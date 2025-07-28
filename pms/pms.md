@@ -1,4 +1,4 @@
-# Persistent Memory System (PMS) v2.2
+# Persistent Memory System (PMS) v1.1.1
 
 ## Especificación Técnica - Arquitectura para Agentes
 
@@ -169,6 +169,8 @@ historias:
 - Gestionar versionado SHA-1 del blueprint
 - Gestionar changelog automático
 - Validar formato antes de guardar
+- Procesar `blueprint_changes.csv`: pasar `proposed` → `reviewed` y, tras aprobación humana, → `merged`
+- Aplicar cambios aprobados: fusionar las propuestas con `status=approved` en `docs/blueprint.md` y registrar la fusión en el changelog
 - Actualizar `memory/project_status.md`
 
 **Integración con PMS:**
