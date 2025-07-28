@@ -1,2 +1,21 @@
 # Contexto temporal - no versionar
 temp_context/
+
+# Archivos temporales PMS
+memory/temp/
+*.tmp
+*.lock
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
