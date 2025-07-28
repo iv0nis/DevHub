@@ -1,12 +1,23 @@
-# Persistent Memory System (PMS) v1.1.1
+# Persistent Memory System (PMS) v1.2.1
 
 ## Especificación Técnica - Arquitectura para Agentes
+
+### Índice
+1. [Requisitos del Proyecto](#1-requisitos-del-proyecto)
+2. [Archivos de Configuración del Sistema](#2-archivos-de-configuración-del-sistema)
+3. [API PMS-Core](#3-api-pms-core)
+4. [Principios Técnicos](#4-principios-técnicos)
+5. [Particionado de Blueprint](#5-particionado-de-blueprint-proyectos-6-meses)
+6. [Health Indicators y Alerts](#6-health-indicators-y-alerts)
+7. [Beneficios del Sistema](#7-beneficios-del-sistema)
+8. [Checklist PMS-Core](#8-checklist-pms-core)
+9. [Glosario](#9-glosario)
 
 ---
 
 ## 1. Requisitos del Proyecto
 
-Para que un proyecto sea compatible con PMS v2.2, debe cumplir los siguientes requisitos obligatorios:
+Para que un proyecto sea compatible con PMS, debe cumplir los siguientes requisitos obligatorios:
 
 ### 1.1 Estructura de Carpetas Obligatoria
 
@@ -52,6 +63,9 @@ sha1_hash: "[hash]"            # OBLIGATORIO - Validación de integridad
 - Épicas con formato `N.X`: `1.1`, `1.2`, `2.1`, `2.2`...
 - User Stories con formato `US-N.X.Y`: `US-1.1.1`, `US-1.2.1`...
 
+**Campos opcionales:**
+- `last_modified` (ISO-8601): Marca temporal actualizada automáticamente por PMS-Core
+
 ---
 
 ## 2. Archivos de Configuración del Sistema
@@ -64,11 +78,13 @@ Configuración central del sistema con rutas y orden de lectura:
 paths:
   status: "./project_status.md"
   blueprint: "../docs/blueprint.md"
+  blueprint_changes: "../docs/blueprint_changes.csv"
   backlog_dir: "../docs/backlog/"
 config:
   rollback_dual: true        # transacciones atómicas
   sha_validation: true       # verificación de integridad
   metrics_tracking: true     # seguimiento automático
+  expected_hash: ""          # hash SHA-1 esperado del blueprint
 ```
 
 **Template completo:** `/templates/memory_index.yaml`
@@ -104,6 +120,7 @@ Fuente de verdad estratégica con fases, épicas y user stories:
 ```markdown
 ---
 version: 1.2
+last_modified: 2025-07-28T14:30:00Z  # ISO-8601, actualizado automáticamente por PMS-Core
 changelog:
   - "Ejemplo: Añadida épica de seguridad"
   - "Ejemplo: Refinada épica base"
@@ -152,128 +169,94 @@ historias:
 
 **Template completo:** `/templates/backlog_f1.yaml`
 
+### 2.5 `docs/blueprint_changes.csv` - Propuestas de Cambio
+
+Sistema colaborativo para proponer modificaciones al blueprint:
+
+```csv
+id,author,timestamp,description,status
+1,DevAgent,2025-07-28T14:22Z,"Añadir US-1.3.1 para configuración CI/CD",proposed
+2,QAAgent,2025-07-28T15:10Z,"Modificar criterios aceptación US-2.1.1",reviewed
+3,PMAgent,2025-07-28T16:05Z,"Nueva épica 3.3 - Monitoreo sistema",approved
+```
+
+**Estados del flujo:**
+- `proposed`: Propuesta inicial por cualquier agente
+- `reviewed`: Validada técnicamente por BluePrintAgent
+- `approved`: Aprobada por humano (PO/PM)
+- `merged`: Fusionada al blueprint por BluePrintAgent
+
+**Template completo:** `/templates/blueprint_changes.csv`
+
 ---
 
-## 3. Arquitectura Multi-Agente
+## 3. API PMS-Core
 
-### 3.1 BluePrintAgent - Gestor Exclusivo de Blueprint
+### 3.1 Funciones Principales
 
-**Rol único:**
-- Único agente autorizado para modificar `docs/blueprint.md`
-- Control exclusivo de estructura del blueprint
-- Control exclusivo de versionado del blueprint
-- Control exclusivo de changelog del blueprint
+```python
+# Cargar datos por scope
+data = pms_core.load(scope="blueprint")
+data = pms_core.load(scope="backlog_f1") 
+data = pms_core.load(scope="project_status")
 
-**Responsabilidades específicas:**
-- Mantener formato obligatorio `Fase N → Épica N.X → US-N.X.Y`
-- Gestionar versionado SHA-1 del blueprint
-- Gestionar changelog automático
-- Validar formato antes de guardar
-- Procesar `blueprint_changes.csv`: pasar `proposed` → `reviewed` y, tras aprobación humana, → `merged`
-- Aplicar cambios aprobados: fusionar las propuestas con `status=approved` en `docs/blueprint.md` y registrar la fusión en el changelog
-- Actualizar `memory/project_status.md`
+# Guardar con rollback
+pms_core.save(scope="blueprint", payload=data, mode="update_dual")
+pms_core.save(scope="project_status", payload=metrics, mode="update_single")
 
-**Integración con PMS:**
-- Lee `docs/project_charter.md`
-- Lee `docs/roadmap.md` 
-- Lee `memory/memory_index.yaml`
-- Produce `docs/blueprint.md` con formato estricto PMS v2.2
-- Usa flujo `read_only` → `update_single`
-- Registra cambios en `memory/project_status.md`
-
-**Contenido del blueprint:**
-- Fases numeradas consecutivamente
-- Épicas con formato N.X por fase
-- User Stories con formato US-N.X.Y por épica
-- Headers YAML obligatorios (version, changelog, sha1_hash)
+# Métricas automáticas
+metrics = pms_core.metrics()
+```
 
 ### 3.2 Contratos del Sistema
 
 #### API pms-core (Funciones universales)
-- `load(paths, scope)` → Carga archivos en memoria según scope del agente
-- `save(scope, data, flow_type)` → Guarda con flujo adaptativo + rollback
+- `load(scope)` → Carga archivos en memoria según scope
+- `save(scope, payload, mode)` → Guarda con flujo adaptativo + rollback
 - `metrics()` → Expone métricas estándar (burndown, health)
 
-#### Tipos de Flujo (Cualquier agente puede usar)
+#### Tipos de Flujo
 - **read_only**: Solo lectura, sin modificaciones
 - **update_single**: Escribe un archivo con validaciones básicas  
 - **update_dual**: Rollback dual atómico para cambios críticos
 
 #### Control de Concurrencia
 - Uso de archivos `.lock` para operaciones atómicas
-- Patrón `.tmp` → `rename()` para atomicidad
+- Patrón `.tmp` → `rename()` para atomicidad (archivos temporales en `memory/temp/`)
 - Validación SHA-1 opcional para detectar cambios externos
 
 ---
 
-## 4. Flujo de Trabajo Unificado
 
-### 4.1 CARGAR CONFIGURACIÓN
-- Leer `memory/memory_index.yaml` → obtener rutas y configuración
-
-### 4.2 EVALUAR ESTADO ACTUAL + MÉTRICAS
-- Leer `memory/project_status.md` → detectar `fase_actual` y métricas
-- **Burndown check**: ¿estamos en ritmo según `velocidad_sprint`?
-- **Health check**: ¿hay demasiadas tareas bloqueadas?
-
-### 4.3 CARGAR CONTEXTO ESTRATÉGICO
-- Leer documentos según `read_order`
-- Validar hash del blueprint (siempre habilitado)
-
-### 4.4 SELECCIONAR TAREA
-- Identificar siguiente tarea con `estado ≠ C`
-- **Priorizar por criticidad**: high → medium → low
-
-### 4.5 FLUJO DE EJECUCIÓN
-
-```
-┌─ TODAS LAS OPERACIONES ───────────────┐
-│ • Ejecutar tarea                      │
-│ • Crear archivos .tmp                 │
-│ • Validar consistencia               │
-│ • Rollback dual atómico              │
-│ • Commit git                          │
-└───────────────────────────────────────┘
-
-*Nota: Todas las tareas usan rollback atómico dual*
-```
-
-### 4.6 ACTUALIZAR MÉTRICAS AUTOMÁTICAMENTE
-- Recalcular contadores por estado
-- Actualizar `velocidad_sprint` si completó sprint
-- Detectar health alerts (ej: >20% bloqueadas)
-
----
-
-## 5. Principios Técnicos
+## 4. Principios Técnicos
 
 > **"Robustez por defecto, simplicidad en la interfaz, visibilidad siempre"**
 
-### 5.1 Robustez por Defecto
+### 4.1 Robustez por Defecto
 - **Rollback dual atómico** - Transacciones que garantizan consistencia de datos
 - **Validación SHA-1** - Detección automática de cambios externos al blueprint
 - **Sistema de locks** - Prevención de corrupción por operaciones concurrentes
 
-### 5.2 Simplicidad en la Interfaz
+### 4.2 Simplicidad en la Interfaz
 - **Templates estandarizados** - Formatos predefinidos para todos los archivos
 - **Estados unificados** - Solo 4 estados posibles (C/P/B/F)
 - **Configuración centralizada** - Un solo archivo de índice maestro
 
-### 5.3 Visibilidad Siempre
+### 4.3 Visibilidad Siempre
 - **Métricas automáticas** - Burndown y health tracking sin configuración
 - **Log cronológico** - Trazabilidad completa de decisiones y cambios
 - **Separación clara** - Documentos humanos vs operativos de agentes
 
-### 5.4 Arquitectura Agnóstica
+### 4.4 Arquitectura Agnóstica
 - **Framework neutral** - No asume roles específicos de agentes
 - **Configuración flexible** - Cada agente define qué lee/escribe según responsabilidades
 - **Contratos claros** - API consistente independiente del tipo de agente
 
 ---
 
-## 6. Particionado de Blueprint (Proyectos >6 meses)
+## 5. Particionado de Blueprint (Proyectos >6 meses)
 
-### 6.1 Estructura Opcional
+### 5.1 Estructura Opcional
 ```
 docs/
 ├── blueprint.md          # Índice general + roadmap
@@ -285,7 +268,7 @@ docs/
 │   └── phase_N.md
 ```
 
-### 6.2 `docs/blueprint.md` (Índice)
+### 5.2 `docs/blueprint.md` (Índice)
 ```markdown
 # Blueprint del Proyecto - Índice General
 
@@ -300,7 +283,7 @@ docs/
 - Total user stories estimadas: 48
 ```
 
-### 6.3 `docs/phases/phase_1.md` (Detalle)
+### 5.3 `docs/phases/phase_1.md` (Detalle)
 ```markdown
 ---
 phase: 1
@@ -319,9 +302,9 @@ parent_blueprint: "../blueprint.md"
 
 ---
 
-## 7. Health Indicators y Alerts
+## 6. Health Indicators y Alerts
 
-### 7.1 Métricas de Salud Automáticas
+### 6.1 Métricas de Salud Automáticas
 
 ```yaml
 # En project_status.md
@@ -342,23 +325,23 @@ health_alerts:
     status: "ok"
 ```
 
-### 7.2 Auto-Alertas del Sistema
+### 6.2 Auto-Alertas del Sistema
 - **Red**: >30% tareas bloqueadas o velocidad <50% objetivo
 - **Yellow**: 15-30% bloqueadas o velocidad 50-80% objetivo  
 - **Green**: <15% bloqueadas y velocidad >80% objetivo
 
 ---
 
-## 8. Beneficios del Sistema
+## 7. Beneficios del Sistema
 
-### 8.1 **Beneficios Clave**
+### 7.1 **Beneficios Clave**
 - **Operación robusta**: Sistema unificado con rollback atómico
 - **Flexibilidad**: Blueprint evolutivo con control de cambios
 - **Escalabilidad**: Particionado opcional para proyectos grandes
 - **Confiabilidad**: Sistema robusto de validaciones y rollback
 - **Observabilidad**: Métricas de burndown y health tracking integradas
 
-### 8.2 **Nuevas Capacidades**
+### 7.2 **Nuevas Capacidades**
 - **Burndown automático**: Visualización de progreso sin overhead
 - **Health monitoring**: Detección temprana de problemas  
 - **Escalabilidad robusta**: Particionado opcional para proyectos grandes
@@ -368,33 +351,60 @@ health_alerts:
 
 ---
 
-## 9. Checklist de Implementación
+## 8. Checklist PMS-Core
 
-### 9.1 Preparación del Proyecto
+### 8.1 Preparación del Proyecto
 - [ ] Crear estructura de carpetas obligatoria (`memory/`, `docs/`, `docs/backlog/`)
 - [ ] Crear directorio `memory/temp/` para rollback
-- [ ] Configurar `.gitignore` para ignorar archivos temporales
+- [ ] Configurar `.gitignore` para ignorar archivos temporales (`.lock`, `temp/`, `*.tmp`)
 
-### 9.2 Configuración Inicial
+### 8.2 Configuración Inicial
 - [ ] Crear `memory/memory_index.yaml` basado en template
 - [ ] Crear `memory/project_status.md` con estado inicial
 - [ ] Crear `docs/blueprint.md` con formato obligatorio
+- [ ] Crear `docs/blueprint_changes.csv` con headers
 
-### 9.3 Validación de Requisitos
+### 8.3 Validación de Requisitos
 - [ ] Verificar formato de headers YAML en blueprint
 - [ ] Verificar numeración correcta de fases (`Fase 1`, `Fase 2`...)
 - [ ] Verificar formato de épicas (`1.1`, `1.2`, `2.1`...)
 - [ ] Verificar formato de user stories (`US-1.1.1`, `US-1.2.1`...)
 
-### 9.4 Configuración de Agentes
-- [ ] Configurar system prompt del DevAgent con lectura PMS
-- [ ] Configurar validación SHA-1 del blueprint
-- [ ] Probar flujo de rollback dual con archivos temporales
-
-### 9.5 Pruebas del Sistema
-- [ ] Ejecutar ciclo completo: lectura → modificación → rollback
+### 8.4 Pruebas del Sistema PMS
+- [ ] Ejecutar ciclo completo: `pms_core.load(scope="blueprint")` → modificación → `save(scope="blueprint", payload=data, mode="update_dual")`
 - [ ] Verificar generación automática de métricas
 - [ ] Validar integridad de archivos tras operaciones
+- [ ] Probar rollback dual con archivos temporales
+
+---
+
+## 9. Glosario
+
+### Términos de Arquitectura
+- **Orchestration Layer**: Capa 1 que define el flow de agentes, orden y dependencias (CrewAI, LangGraph, etc.)
+- **Agent Service**: Capa 2 con lógica de dominio específica de cada agente (BluePrintAgent, BacklogAgent, etc.)
+- **PMS-Core**: Capa 3 que proporciona persistencia, rollback dual, validación SHA-1 e integridad de datos
+- **Storage Layer**: Capa 4 con drivers de almacenamiento (filesystem, DB, Git, S3, etc.)
+
+### Términos de Flujo
+- **Flow**: Orquestación de agentes que define qué agente ejecuta cuándo, sin tocar archivos directamente
+- **Scope**: Identificador de recurso en PMS-Core (`"blueprint"`, `"backlog_f1"`, `"project_status"`)
+- **Mode**: Tipo de operación de guardado (`"read_only"`, `"update_single"`, `"update_dual"`)
+
+### Términos de Datos
+- **Blueprint**: Documento estratégico con fases, épicas y user stories; solo modificable por BluePrintAgent
+- **Backlog**: Documentos operativos por fase con tareas ejecutables y estados
+- **Memory Index**: Archivo maestro `memory_index.yaml` que define rutas y configuración del sistema
+
+---
+
+## Changelog
+
+### v1.2.1 - 2025-07-28
+- **Plantillas alineadas con spec**: añadido `blueprint_changes`, `expected_hash`; retirado `read_order`
+- **Documentado `last_modified`** como campo opcional (ISO-8601, actualizado automáticamente por PMS-Core)
+- **Separación Flow vs PMS**: contenido de orquestación movido a `../agents/agents.md`
+- **Estructura limpia**: PMS enfocado exclusivamente en persistencia
 
 ---
 

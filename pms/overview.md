@@ -1,51 +1,92 @@
-# PMS v2.2 - Overview
+# PMS Overview - Resumen Ejecutivo
 
-## Sistema de Memoria Persistente para Agentes LLM
+## ¿Qué es PMS?
 
-PMS v2.2 proporciona memoria estructurada y persistente para agentes de IA, garantizando continuidad operativa y trazabilidad completa en proyectos de desarrollo.
+**Persistent Memory System (PMS)** es un sistema de persistencia y gestión de estado para proyectos con agentes AI. Proporciona estructura, integridad y trazabilidad sin imponer ningún framework de orquestación específico.
 
-## 🚀 Características Clave
+## Requisitos Obligatorios
 
-- **Rollback atómico dual** - Transacciones seguras con consistencia garantizada
-- **Métricas integradas** - Burndown automático y health tracking en tiempo real  
-- **Blueprint evolutivo** - Control SHA-1 y versionado con changelog
-- **Arquitectura multi-agente** - Separación clara entre documentos humanos y operativos
-- **Escalabilidad robusta** - Particionado opcional para proyectos extensos
-
-## 🧠 Tipos de Memoria
-
-- **🧠 Trabajo** - Backlogs activos (`backlog/`)
-- **⚡ Corto plazo** - Archivos temporales (`memory/temp/`)  
-- **📚 Largo plazo** - Documentos estratégicos (`docs/`)
-- **🎬 Episódica** - Log cronológico (`memory/project_status.md`)
-
-## 📁 Estructura del Proyecto
-
+### Estructura Mínima
 ```
 project-root/
 ├── memory/
-│   ├── memory_index.yaml     # Configuración central
-│   ├── project_status.md     # Estado + métricas
-│   └── temp/                 # Transacciones
+│   ├── memory_index.yaml        # Configuración central
+│   ├── project_status.md        # Estado + métricas
+│   └── temp/                    # Rollback atómico
 ├── docs/
-│   ├── project_charter.md    # Visión (humano)
-│   ├── roadmap.md           # Planificación (humano)  
-│   └── blueprint.md         # Fases + épicas (humano)
-└── backlog/
-    └── backlog_fN.yaml      # Tareas operativas (agente)
+│   ├── blueprint.md            # Fuente de verdad estratégica
+│   ├── blueprint_changes.csv   # Propuestas de cambio collaborativas
+│   └── backlog/                # Tareas operativas por fase
+└── .gitignore                  # Ignora .lock, temp/, *.tmp
 ```
 
-## 🎯 Casos de Uso
+### Archivos Obligatorios
+- `memory/memory_index.yaml`: Rutas y configuración del sistema
+- `memory/project_status.md`: Estado actual con métricas integradas
+- `docs/blueprint.md`: Blueprint con formato específico (fases → épicas → US)
+- `docs/blueprint_changes.csv`: Sistema de propuestas collaborativas
+- Al menos un `docs/backlog/backlog_f{n}.yaml` por fase
 
-- **Proyectos multi-fase** con equipos de agentes IA
-- **Desarrollo con continuidad** - reanudar trabajo tras interrupciones
-- **Trazabilidad completa** - auditoría de decisiones y progreso
-- **Colaboración humano-agente** - separación clara de responsabilidades
+## API PMS-Core
 
-## 🔧 Estados de Tareas
+### Funciones Principales
+```python
+# Cargar datos
+data = pms_core.load(scope="blueprint")
+data = pms_core.load(scope="backlog_f1") 
+data = pms_core.load(scope="project_status")
 
-- `C` = Completed | `P` = In-Progress | `B` = Blocked | `F` = Failed
+# Guardar con rollback
+pms_core.save(scope="blueprint", payload=data, mode="update_dual")
+pms_core.save(scope="project_status", payload=metrics, mode="update_single")
+
+# Métricas automáticas
+metrics = pms_core.metrics()
+```
+
+### Modos de Operación
+- `read_only`: Solo lectura, sin modificaciones
+- `update_single`: Escribe un archivo con validaciones básicas
+- `update_dual`: Rollback dual atómico para cambios críticos
+
+## Control de Integridad
+
+- **SHA-1 validation**: Detecta cambios externos al blueprint
+- **Rollback dual**: Archivos `.tmp` + `rename()` atómico en `memory/temp/`
+- **Concurrencia**: Archivos `.lock` para operaciones críticas
+
+## Métricas Automáticas
+
+El sistema calcula automáticamente:
+- Porcentaje de completado por fase
+- Velocidad de sprint (tareas/tiempo)
+- Health alerts (ratio de tareas bloqueadas)
+- Burndown tracking integrado
+
+## Pasos de Arranque
+
+1. **Crear estructura**: `mkdir -p project/{memory/temp,docs/backlog}`
+2. **Copiar templates** desde `pms/templates/`
+3. **Rellenar campos obligatorios** en cada archivo
+4. **Configurar .gitignore** para archivos temporales
+5. **Probar rollback**: Ejecutar ciclo `load → modify → save(update_dual)`
+
+## Sistema de Propuestas Collaborativo
+
+- **Flujo**: `proposed` → `reviewed` → `approved` → `merged`
+- **Participantes**: Cualquier agente puede proponer, solo BluePrintAgent fusiona
+- **Trazabilidad**: Cada cambio queda registrado con autor, timestamp y estado
+- **Control humano**: Aprobación final siempre requiere revisión humana
+
+## Beneficios Clave
+
+✅ **Robustez**: Rollback atómico dual garantiza consistencia  
+✅ **Flexibilidad**: Blueprint evolutivo con control de cambios  
+✅ **Escalabilidad**: Particionado opcional para proyectos grandes  
+✅ **Observabilidad**: Métricas de burndown y health integradas  
+✅ **Framework-agnostic**: Compatible con CrewAI, LangGraph, custom orchestrators
 
 ---
 
-**PMS v2.2** - Memoria persistente para agentes LLM • *Robusto • Observable • Evolutivo*
+Para detalles técnicos completos, consultar [`pms.md`](./pms.md).  
+Para integración con agentes, consultar [`../agents/agents.md`](../agents/agents.md).
