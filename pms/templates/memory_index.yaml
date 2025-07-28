@@ -1,0 +1,18 @@
+version: 2.2
+paths:
+  status: "./project_status.md"
+  charter: "../docs/project_charter.md"
+  roadmap: "../docs/roadmap.md"
+  blueprint: "../docs/blueprint.md"
+  backlog_dir: "../docs/backlog/"
+read_order:
+  - memory_index
+  - project_status
+  - project_charter
+  - roadmap
+  - blueprint
+  - "backlog_f${fase_actual}"
+config:
+  rollback_dual: true        # transacciones atómicas para consistencia de datos
+  sha_validation: true       # verificación de integridad del blueprint
+  metrics_tracking: true     # seguimiento automático de progreso y salud
