@@ -1,10 +1,24 @@
-# Agents - Flow y Orquestación
+# Agents System - Especificación Técnica
 
-## Arquitectura de Agentes
+## Documentación de Agentes DevHub
 
-Este documento define el **flow de agentes** y su **orquestación**, manteniendo separada la responsabilidad de PMS-Core (persistencia) de la lógica de flow (coordinación).
+Este documento define el **sistema de agentes**, su **orquestación** y **contratos de integración** con PMS-Core, manteniendo separada la responsabilidad de persistencia (PMS-Core) de la lógica de coordinación (Orchestration Layer).
 
-### Separación de Responsabilidades
+### Índice
+1. [Arquitectura del Sistema](#1-arquitectura-del-sistema)
+2. [Definición de Agent Services](#2-definición-de-agent-services)
+3. [Contratos de Integración](#3-contratos-de-integración)
+4. [Flow de Trabajo](#4-flow-de-trabajo)
+5. [Configuración por Agente](#5-configuración-por-agente)
+6. [Ejemplos de Implementación](#6-ejemplos-de-implementación)
+7. [Eventos y Comunicación](#7-eventos-y-comunicación)
+8. [Templates y Referencias](#8-templates-y-referencias)
+
+---
+
+## 1. Arquitectura del Sistema
+
+### 1.1 Separación de Responsabilidades
 
 ```
 ┌──────────────────────────────┐
@@ -24,9 +38,14 @@ Este documento define el **flow de agentes** y su **orquestación**, manteniendo
 └──────────────────────────────┘
 ```
 
-## Agents Services Definidos
+### 1.2 **Principio Fundamental**
+> **Los agents NUNCA acceden a archivos directamente. Siempre usan la API PMS-Core.**
 
-### BluePrintAgent
+---
+
+## 2. Definición de Agent Services
+
+### 2.1 BluePrintAgent
 **Responsabilidad**: Gestión exclusiva del blueprint estratégico
 
 ```yaml
@@ -45,7 +64,7 @@ integration:
   mode: "update_dual"  # Cambios críticos requieren rollback atómico
 ```
 
-### DevAgent  
+### 2.2 DevAgent  
 **Responsabilidad**: Ejecución de tareas de desarrollo
 
 ```yaml
@@ -64,7 +83,7 @@ integration:
   mode: "update_single"  # Actualizaciones de estado no críticas
 ```
 
-### QAAgent
+### 2.3 QAAgent
 **Responsabilidad**: Validación y testing
 
 ```yaml
@@ -83,9 +102,39 @@ integration:
   mode: "update_single"
 ```
 
-## Flow de Trabajo
+---
 
-### 1. Ciclo Principal
+## 3. Contratos de Integración
+
+### 3.1 Regla Fundamental
+**Los agentes NUNCA acceden a archivos directamente.** Siempre usan la API PMS-Core.
+
+### 3.2 API PMS-Core para Agents
+
+```python
+# Cargar datos por scope
+data = pms_core.load(scope="blueprint")
+data = pms_core.load(scope="backlog_f1") 
+data = pms_core.load(scope="project_status")
+
+# Guardar con rollback
+pms_core.save(scope="blueprint", payload=data, mode="update_dual")
+pms_core.save(scope="project_status", payload=metrics, mode="update_single")
+
+# Métricas automáticas
+metrics = pms_core.metrics()
+```
+
+### 3.3 Tipos de Operación
+- **read_only**: Solo lectura, sin modificaciones
+- **update_single**: Escribe un archivo con validaciones básicas  
+- **update_dual**: Rollback dual atómico para cambios críticos
+
+---
+
+## 4. Flow de Trabajo
+
+### 4.1 Ciclo Principal
 
 ```mermaid
 graph TD
@@ -99,7 +148,7 @@ graph TD
     G -->|No| H[Fin ciclo]
 ```
 
-### 2. Gestión de Propuestas
+### 4.2 Gestión de Propuestas
 
 ```mermaid
 graph LR
@@ -112,12 +161,7 @@ graph LR
     G --> H[Estado: merged]
 ```
 
-## Contratos de Integración
-
-### Regla Fundamental
-**Los agentes NUNCA acceden a archivos directamente.** Siempre usan la API PMS-Core.
-
-### Ejemplo de Implementación
+### 4.3 Ejemplo de Implementación de Agent
 
 ```python
 class DevAgent:
@@ -154,9 +198,33 @@ class DevAgent:
             self.pms.append(scope="blueprint_changes", payload=change)
 ```
 
-## Configuración de Orchestrator
+---
 
-### Ejemplo con CrewAI
+## 5. Configuración por Agente
+
+Cada agente tiene su configuración específica en `agents/{AgentName}.yaml`. Ver [sección 8](#8-templates-y-referencias) para templates completos.
+
+### 5.1 Estructura de Configuración
+
+```yaml
+agent_id: [nombre_agente]
+model: claude-3-5-sonnet
+temperature: 0.1
+system_prompt: |
+  [Prompt específico del agente]
+capabilities:
+  - [lista de capacidades]
+pms_scopes:
+  read: ["scope1", "scope2"]
+  write: ["scope3", "scope4"]
+  mode: "update_single|update_dual"
+```
+
+---
+
+## 6. Ejemplos de Implementación
+
+### 6.1 Ejemplo con CrewAI
 
 ```yaml
 # crew_config.yaml
@@ -187,7 +255,7 @@ crew:
     health_check_interval: "5_minutes"
 ```
 
-### Ejemplo con LangGraph
+### 6.2 Ejemplo con LangGraph
 
 ```python
 from langgraph import StateGraph
@@ -211,9 +279,11 @@ def create_agent_flow():
     return workflow.compile()
 ```
 
-## Eventos y Comunicación
+---
 
-### Eventos del Sistema
+## 7. Eventos y Comunicación
+
+### 7.1 Eventos del Sistema
 
 - `task_started`: Agente inicia una tarea
 - `task_completed`: Tarea terminada (C/F)
@@ -221,7 +291,7 @@ def create_agent_flow():
 - `metrics_updated`: Métricas recalculadas
 - `health_alert`: Sistema detecta problema (>20% bloqueadas)
 
-### Comunicación Entre Agentes
+### 7.2 Comunicación Entre Agentes
 
 ```python
 # ❌ INCORRECTO - Acceso directo a archivos
@@ -235,11 +305,15 @@ blueprint = pms_core.load(scope="blueprint")
 event_bus.publish("task_completed", {"task_id": "T-1.2.1", "status": "C"})
 ```
 
-## Configuración por Agente
+---
+
+## 8. Templates y Referencias
+
+### 8.1 Template de Configuración de Agent
 
 Cada agente tiene su configuración específica en `agents/{AgentName}.yaml`:
 
-### BluePrintAgent.yaml
+### 8.2 BluePrintAgent.yaml
 ```yaml
 agent_id: blueprint_agent
 model: claude-3-5-sonnet
@@ -269,6 +343,14 @@ pms_scopes:
   mode: "update_dual"
 ```
 
+### 8.3 Referencias Cruzadas
+
+- **[overview.md](./overview.md)** - Resumen ejecutivo del sistema de agentes
+- **[pms.md](../pms/pms.md)** - API PMS-Core, persistencia y rollback
+- **Configuración específica:** `BluePrintAgent.yaml`, `DevAgent.yaml`, `QAAgent.yaml`
+
 ---
 
-**Nota**: Este documento se centra exclusivamente en orquestación y flow. Para detalles de persistencia, rollback y estructura de archivos, consultar [`../pms/pms.md`](../pms/pms.md).
+**Estado**: ✅ Especificación técnica completa • Sistema operativo • Ready for production
+
+**Nota**: Este documento se centra exclusivamente en orquestación y flow de agentes. Para detalles de persistencia, rollback y estructura de archivos, consultar [`../pms/pms.md`](../pms/pms.md).
