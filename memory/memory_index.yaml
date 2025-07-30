@@ -1,0 +1,10 @@
+paths:
+  status: "./project_status.md"
+  blueprint: "../docs/blueprint.md"
+  blueprint_changes: "../docs/blueprint_changes.csv"
+  backlog_dir: "../docs/backlog/"
+config:
+  rollback_dual: true
+  sha_validation: true
+  metrics_tracking: true
+  expected_hash: ""

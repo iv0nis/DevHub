@@ -1,0 +1,10 @@
+fase: 1
+sprint: 1
+historias:
+  US-1.1.1:
+    estado: P
+    tareas:
+      - id: T-1.1.1a
+        desc: "Test task"
+        estado: C
+        criticidad: medium
