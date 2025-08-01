@@ -118,3 +118,7 @@ memory/cache/
 logs/
 debug.log
 error.log
+
+# Herramientas temporales de desarrollo
+LorePilot.py
+docs-explorer-temp.html
