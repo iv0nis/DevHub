@@ -2,7 +2,13 @@
 
 ## 1. Propósito del MVP
 
-Crear un **wizard funcional de 6 pasos** que genere artefactos PMS (Charter, Roadmap, Blueprint) y valide el flujo completo que tendrá el DevHub futuro. Este MVP sirve como prototipo para validar UX y integración con PMS-Core.
+Crear un **sandbox funcional** para desarrollar el sistema UI de DevHub (actualmente inexistente) y validar la integración entre sus 3 pilares fundamentales:
+
+- **PMS** (Persistent Memory System) - Sistema de memoria persistente
+- **DAS** (DevAgent System) - Sistema de agentes autónomos  
+- **UI** (User Interface) - Interface de usuario
+
+El MVP implementa un wizard de 6 pasos que genera artefactos PMS y simula el flujo completo que tendrá DevHub, sirviendo como prototipo para validar la integración de los 3 pilares.
 
 ## 2. Arquitectura MVP (Actual)
 
@@ -13,7 +19,7 @@ Crear un **wizard funcional de 6 pasos** que genere artefactos PMS (Charter, Roa
 - **Zustand** para state management entre pasos
 
 ### 2.2 Backend
-- **Agentes GPT via navegador** (simulación temporal)
+- **DAS via navegador** (simulación temporal de DevAgent System)
 - **API routes** `/api/pms/` para bridge Python-Node.js
 - **Integración directa** con `pms_core.py`
 
@@ -30,7 +36,7 @@ Crear un **wizard funcional de 6 pasos** que genere artefactos PMS (Charter, Roa
 - **Same state management**
 
 ### 3.2 Backend
-- **Agentes integrados DENTRO de DevAgent** (no navegador)
+- **DAS integrado** (DevAgent System interno, no navegador)
 - **Same API routes** estructura
 - **Same PMS-Core** integration
 
@@ -40,11 +46,11 @@ Crear un **wizard funcional de 6 pasos** que genere artefactos PMS (Charter, Roa
 
 ## 4. Evolutividad MVP → DevHub
 
-**Ventaja clave**: El MVP permite **evolución sin breaking changes**
+**Ventaja clave**: El MVP permite **evolución sin breaking changes** de los 3 pilares
 
-1. **Frontend**: Reutilización 100% - misma UX validada
-2. **Storage**: Reutilización 100% - PMS-Core ya integrado  
-3. **Backend**: Solo reemplazar **capa de agentes** (navegador → DevAgent interno)
+1. **UI**: Reutilización 100% - frontend validado y funcional
+2. **PMS**: Reutilización 100% - sistema ya integrado y probado  
+3. **DAS**: Solo reemplazar implementación (navegador → DevAgent System interno)
 
 ## 5. Flujo de 6 Pasos
 

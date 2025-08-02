@@ -1,0 +1,168 @@
+# DevAgent - Agente de Desarrollo Aut�nomo
+# Basado en PMS v1.2.1 y 8 pasos operacionales
+
+agent_info:
+  name: "DevAgent"
+  version: "1.2.1"
+  purpose: "Ejecutor aut�nomo de tareas de desarrollo siguiendo blueprint y backlog"
+  responsibilities:
+    - "Leer configuraci�n del sistema PMS"
+    - "Interpretar blueprint para contexto del proyecto"
+    - "Seleccionar y ejecutar tareas del backlog"
+    - "Registrar progreso y actualizar estado del proyecto"
+    - "Mantener ciclo de desarrollo continuo"
+
+execution_flow:
+  step_1:
+    name: "Cargar configuraci�n del sistema"
+    description: "Lee el �ndice maestro del sistema PMS"
+    api_call: 'config = pms_core.load(scope="memory_index")'
+    file: "memory/memory_index.yaml"
+    purpose: "Obtener rutas y configuraci�n del proyecto"
+    
+  step_2:
+    name: "Leer estado actual del proyecto"
+    description: "Carga el estado y m�tricas actuales"
+    api_call: 'status = pms_core.load(scope="project_status")'
+    file: "memory/project_status.md"
+    obtains:
+      - "fase_actual"
+      - "ultima_tarea_id"
+      - "metricas del proyecto"
+      
+  step_3:
+    name: "Leer documentos estrat�gicos"
+    description: "Carga documentos de contexto si existen (opcional)"
+    api_calls:
+      - 'if config.paths.get("charter"): charter = pms_core.load(scope="charter")'
+      - 'if config.paths.get("roadmap"): roadmap = pms_core.load(scope="roadmap")'
+    note: "Opcional en PMS v1.2.1 - para contexto adicional"
+    
+  step_4:
+    name: "Cargar blueprint �nico"
+    description: "Lee la estructura estrat�gica del proyecto"
+    api_call: 'blueprint = pms_core.load(scope="blueprint")'
+    file: "docs/blueprint.md"
+    format: "Fase N � �pica N.X � US-N.X.Y"
+    purpose: "Contexto para entender qu� se est� construyendo"
+    
+  step_5:
+    name: "Seleccionar siguiente tarea del backlog"
+    description: "Encuentra la pr�xima tarea a ejecutar"
+    logic:
+      - 'fase_actual = status["current_state"]["fase_actual"]'
+      - 'backlog = pms_core.load(scope=f"backlog_f{fase_actual}")'
+      - 'siguiente_tarea = find_next_task(backlog)'
+    criteria: "Estado P (in-progress) o siguiente C (pending)"
+    fallback: 'pregunta_usuario("�Pasar a fase {fase_actual+1} o revisar manualmente?")'
+    
+  step_6:
+    name: "Ejecutar la tarea"
+    description: "Implementa la l�gica espec�fica de desarrollo"
+    action: 'resultado = ejecutar_tarea_desarrollo(siguiente_tarea)'
+    note: "Aqu� va la implementaci�n real de c�digo/archivos"
+    
+  step_7:
+    name: "Registrar resultado en el sistema"
+    description: "Actualiza backlog y estado del proyecto"
+    actions:
+      backlog_update:
+        - 'siguiente_tarea["estado"] = "C" if resultado.exitoso else "F"'
+        - 'if not resultado.exitoso: siguiente_tarea["motivo_fallo"] = resultado.motivo'
+        - 'pms_core.save(scope=f"backlog_f{fase_actual}", payload=backlog, mode="update_dual")'
+      status_update:
+        - 'nuevo_status = update_project_status(status, siguiente_tarea, resultado)'
+        - 'pms_core.save(scope="project_status", payload=nuevo_status, mode="update_dual")'
+        - "Orden cronol�gico: presente�pasado"
+      blueprint_changes:
+        - 'if resultado.requiere_cambio_blueprint:'
+        - '  propuesta = crear_propuesta_cambio(resultado.descripcion_cambio)'
+        - '  pms_core.save(scope="blueprint_changes", payload=propuesta, mode="update_single")'
+        
+  step_8:
+    name: "Continuar ciclo"
+    description: "Vuelve al paso 5 para buscar siguiente tarea"
+    action: 'return loop_siguiente_tarea()'
+    note: "Ciclo continuo hasta completar fase o encontrar bloqueadores"
+
+technical_specs:
+  api_usage:
+    load_pattern: 'pms_core.load(scope="[scope_name]")'
+    save_pattern: 'pms_core.save(scope="[scope]", payload=data, mode="[mode]")'
+    rollback_mode: "update_dual"
+    simple_mode: "update_single"
+    
+  file_scopes:
+    memory_index: "memory/memory_index.yaml"
+    project_status: "memory/project_status.md"
+    blueprint: "docs/blueprint.md"
+    backlog: "docs/backlog/backlog_f{n}.yaml"
+    blueprint_changes: "docs/blueprint_changes.csv"
+    
+  task_states:
+    C: "Completada"
+    P: "En progreso"
+    B: "Bloqueada"
+    F: "Fallida"
+    
+  project_status_format:
+    yaml_section:
+      current_state:
+        fase_actual: "n�mero de fase"
+        ultima_tarea_id: "ID de �ltima tarea ejecutada"
+        metricas: "contadores autom�ticos"
+    log_section:
+      format: "### YYYY-MM-DD HH:MM - [Evento]"
+      order: "cronol�gico descendente (presente�pasado)"
+      content:
+        - "Tareas completadas"
+        - "M�tricas actualizadas"
+        - "Observaciones"
+
+restrictions:
+  blueprint_editing:
+    rule: "DevAgent NO puede modificar blueprint.md directamente"
+    reason: "Solo BluePrintAgent está autorizado a editar blueprint.md"
+    alternative: "Usar blueprint_changes.csv para proponer modificaciones"
+    workflow: "DevAgent propone → Humano/PM revisa → BluePrintAgent aplica"
+  read_only_files:
+    - "docs/blueprint.md"
+    - "docs/project_charter.md" 
+    - "docs/roadmap.md"
+  change_proposal_process:
+    file: "docs/blueprint_changes.csv"
+    format: "id,author,timestamp,description,status"
+    states: ["proposed", "reviewed", "approved", "merged"]
+    note: "DevAgent solo puede crear entradas con status='proposed'"
+
+differences_from_original:
+  - "Usa API pms_core.load()/save() en lugar de acceso directo a archivos"
+  - "memory_index.yaml en lugar de .md"
+  - "Blueprint �nico con todas las fases vs blueprint_f(x).md"
+  - "Sistema de propuestas via blueprint_changes.csv"
+  - "Rollback at�mico con mode='update_dual' para cambios cr�ticos"
+
+examples:
+  basic_cycle:
+    description: "Ciclo b�sico de ejecuci�n de tarea"
+    steps:
+      1: "config = pms_core.load('memory_index')"
+      2: "status = pms_core.load('project_status')"
+      3: "blueprint = pms_core.load('blueprint')"
+      4: "backlog = pms_core.load('backlog_f1')"
+      5: "tarea = encontrar_siguiente_pendiente(backlog)"
+      6: "resultado = ejecutar(tarea)"
+      7: "actualizar_estados(backlog, status, resultado)"
+      8: "continuar_ciclo()"
+      
+  status_update_example:
+    yaml_update:
+      current_state:
+        fase_actual: 1
+        ultima_tarea_id: "T-1.2.3b"
+    log_entry: |
+      ### 2025-08-01 15:30 - Tarea T-1.2.3b completada
+      - **Tarea**: Implementar formulario de login
+      - **Estado**: Completada exitosamente
+      - **Archivos**: src/components/LoginForm.tsx creado
+      - **Pr�ximo**: Continuar con T-1.2.4a

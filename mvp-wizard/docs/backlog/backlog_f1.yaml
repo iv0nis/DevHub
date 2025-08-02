@@ -21,37 +21,39 @@ historias:
 
   US-1.2.1:
     descripcion: "Estructura stepper básico"
-    estado: P          # P = In-Progress
+    estado: C          # C = Completed
     tareas:
       - id: T-1.2.1a
-        desc: "Crear carpetas src/app/step/[id]"
-        estado: P
+        desc: "Crear carpetas src/app/step/[step]"
+        estado: C
         criticidad: high
       - id: T-1.2.1b
         desc: "Instalar Zustand para estado global"
         estado: P
-        criticidad: medium
+        criticidad: low
+        note: "Pendiente - no crítico para MVP"
       - id: T-1.2.1c
         desc: "Crear componentes base (Stepper, Navigation)"
-        estado: P
+        estado: C
         criticidad: high
 
   US-1.2.2:
     descripcion: "Rutas dinámicas /step/1-6"
-    estado: P
+    estado: C
     tareas:
       - id: T-1.2.2a
-        desc: "Configurar rutas step/[id]/page.tsx"
-        estado: P
+        desc: "Configurar rutas step/[step]/page.tsx"
+        estado: C
         criticidad: high
       - id: T-1.2.2b
         desc: "Implementar navegación entre pasos"
-        estado: P
+        estado: C
         criticidad: medium
       - id: T-1.2.2c
         desc: "Crear layout común StepLayout"
         estado: P
-        criticidad: medium
+        criticidad: low
+        note: "Opcional - navegación ya funciona"
 
   US-1.3.1:
     descripcion: "API PMS-Core integration"
