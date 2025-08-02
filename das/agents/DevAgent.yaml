@@ -134,6 +134,10 @@ restrictions:
     format: "id,author,timestamp,description,status"
     states: ["proposed", "reviewed", "approved", "merged"]
     note: "DevAgent solo puede crear entradas con status='proposed'"
+  commit_guidelines:
+    no_signatures: "NUNCA incluir firmas como 'Generated with Claude Code' o 'Co-Authored-By: Claude'"
+    no_emojis: "NUNCA usar emojis en mensajes de commit"
+    format: "Mensaje conciso en español sin decoraciones adicionales"
 
 differences_from_original:
   - "Usa API pms_core.load()/save() en lugar de acceso directo a archivos"
