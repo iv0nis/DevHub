@@ -382,7 +382,7 @@ health_alerts:
 
 ### Términos de Arquitectura
 - **Orchestration Layer**: Capa 1 que define el flow de agentes, orden y dependencias (CrewAI, LangGraph, etc.)
-- **Agent Service**: Capa 2 con lógica de dominio específica de cada agente (BluePrintAgent, BacklogAgent, etc.)
+- **Agent Service**: Capa 2 con lógica de dominio específica de cada agente (BluePrintAgent, DevAgent, etc.)
 - **PMS-Core**: Capa 3 que proporciona persistencia, rollback dual, validación SHA-1 e integridad de datos
 - **Storage Layer**: Capa 4 con drivers de almacenamiento (filesystem, DB, Git, S3, etc.)
 
