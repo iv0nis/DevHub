@@ -1,4 +1,4 @@
-# Persistent Memory System (PMS) v1.2.1
+# Persistent Memory System (PMS) v1.3.0
 
 ## Especificación Técnica - Arquitectura para Agentes
 
@@ -399,6 +399,12 @@ health_alerts:
 ---
 
 ## Changelog
+
+### v1.3.0 - 2025-08-03
+- **Nueva función bootstrap_pms()**: Inicialización automática del sistema PMS completo
+- **Templates mejorados**: Generación con valores reales en lugar de placeholders
+- **Validación post-bootstrap**: Verificación automática de archivos creados correctamente
+- **Integración DAS**: Compatible con sistema de enforcement técnico de agentes
 
 ### v1.2.1 - 2025-07-28
 - **Plantillas alineadas con spec**: añadido `blueprint_changes`, `expected_hash`; retirado `read_order`
