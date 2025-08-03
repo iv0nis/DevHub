@@ -119,6 +119,16 @@ technical_specs:
         - "M�tricas actualizadas"
         - "Observaciones"
 
+pms_scopes:
+  read: ["memory_index", "backlog_f*", "blueprint", "project_status"]
+  write: ["backlog_f*", "project_status", "blueprint_changes"]
+  mode: "update_single"
+
+enforcement:
+  enabled: true
+  strict_mode: true
+  log_violations: true
+
 restrictions:
   blueprint_editing:
     rule: "DevAgent NO puede modificar blueprint.md directamente"

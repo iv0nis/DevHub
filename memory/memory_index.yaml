@@ -4,7 +4,7 @@ paths:
   blueprint_changes: "../docs/blueprint_changes.csv"
   backlog_dir: "../docs/backlog/"
 config:
-  rollback_dual: true
-  sha_validation: true
-  metrics_tracking: true
-  expected_hash: ""
+  rollback_dual: true        # transacciones atómicas
+  sha_validation: true       # verificación de integridad
+  metrics_tracking: true     # seguimiento automático
+  expected_hash: ""          # hash SHA-1 esperado del blueprint

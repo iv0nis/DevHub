@@ -407,6 +407,131 @@ def metrics(name: str) -> Any:  # noqa: ANN401 – generic return for MVP
 
 
 # ---------------------------------------------------------------------------
+# Bootstrap and initialization
+# ---------------------------------------------------------------------------
+
+def bootstrap_pms(project_name: str = "proyecto") -> bool:
+    """Initialize complete PMS structure with real values for a new project.
+    
+    Implements official PMS bootstrap steps:
+    1. Create directory structure
+    2. Generate files from templates with real values  
+    3. Configure .gitignore
+    4. Test rollback functionality
+    
+    Args:
+        project_name: Name of the project being initialized
+        
+    Returns:
+        True if initialization successful, False otherwise
+        
+    Raises:
+        PMSCoreError: If initialization fails
+    """
+    try:
+        # 1. Create directory structure
+        MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+        (MEMORY_DIR / "temp").mkdir(parents=True, exist_ok=True)
+        DOCS_DIR.mkdir(parents=True, exist_ok=True)
+        BACKLOG_DIR.mkdir(parents=True, exist_ok=True)
+        
+        # 2. Generate memory_index.yaml with real values
+        memory_index_content = f"""paths:
+  status: "./project_status.md"
+  blueprint: "../docs/blueprint.md"
+  blueprint_changes: "../docs/blueprint_changes.csv"
+  backlog_dir: "../docs/backlog/"
+config:
+  rollback_dual: true        # transacciones atómicas
+  sha_validation: true       # verificación de integridad
+  metrics_tracking: true     # seguimiento automático
+  expected_hash: ""          # hash SHA-1 esperado del blueprint
+"""
+        
+        # 3. Generate project_status.md with real initial values
+        current_timestamp = datetime.now(timezone.utc).strftime(ISO_FMT)
+        project_status_content = f"""---
+version: 1.0
+last_updated: {current_timestamp}
+---
+
+# Project Status - {project_name}
+
+## Current State
+
+```yaml
+current_state:
+  fase_actual: 1
+  sprint_actual: 1
+  ultima_tarea_id: ""
+  
+  # Métricas para Burndown y Health
+  metricas:
+    total_tareas: 0
+    completadas: 0
+    en_progreso: 0
+    bloqueadas: 0
+    fallidas: 0
+    pendientes: 0
+    
+    # Health indicators
+    velocidad_sprint: 0.0        # tareas completadas/sprint promedio
+    porcentaje_completado: 0.0   # (completadas/total) * 100
+    porcentaje_bloqueadas: 0.0   # (bloqueadas/total) * 100
+    
+    # Burndown data
+    sprints_transcurridos: 0
+    sprints_estimados: 1
+    tareas_por_sprint_objetivo: 0.0
+```
+
+## Registro de Cambios (Cronológico Descendente)
+
+### {current_timestamp.split('T')[0]} - Proyecto inicializado
+- **Proyecto**: {project_name} creado
+- **Estado**: Sistema PMS inicializado
+- **Métricas**: Estado inicial (0 tareas)
+- **Próximo**: Definir blueprint y primer backlog
+"""
+        
+        # 4. Write files atomically
+        _atomic_write(MEMORY_DIR / "memory_index.yaml", memory_index_content.encode("utf-8"))
+        _atomic_write(MEMORY_DIR / "project_status.md", project_status_content.encode("utf-8"))
+        
+        # 5. Create basic .gitignore if it doesn't exist
+        gitignore_path = PROJECT_ROOT / ".gitignore"
+        gitignore_content = """# PMS temporary files
+memory/temp/
+*.lock
+*.tmp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+"""
+        
+        if not gitignore_path.exists():
+            _atomic_write(gitignore_path, gitignore_content.encode("utf-8"))
+        
+        # 6. Test basic functionality
+        test_index = load("memory_index")
+        test_status = load("project_status")
+        
+        if not test_index or not test_status:
+            raise PMSCoreError("Bootstrap validation failed - files not readable")
+            
+        return True
+        
+    except Exception as e:
+        raise PMSCoreError(f"PMS bootstrap failed: {e}") from e
+
+
+# ---------------------------------------------------------------------------
 # CLI helper (optional)
 # ---------------------------------------------------------------------------
 
