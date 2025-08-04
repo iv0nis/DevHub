@@ -1,8 +1,8 @@
-# Agents System - Especificación Técnica
+# Dev Agents System - Especificación Técnica
 
-## Documentación de Agentes DevHub
+## DevAgents System - DevHub
 
-Este documento define el **sistema de agentes**, su **orquestación** y **contratos de integración** con PMS-Core, manteniendo separada la responsabilidad de persistencia (PMS-Core) de la lógica de coordinación (Orchestration Layer).
+Este documento define el **DevAgents System**, su **orquestación** y **contratos de integración** con PMS-Core, manteniendo separada la responsabilidad de persistencia (PMS-Core) de la lógica de coordinación (Orchestration Layer).
 
 ### Índice
 1. [Arquitectura del Sistema](#1-arquitectura-del-sistema)
