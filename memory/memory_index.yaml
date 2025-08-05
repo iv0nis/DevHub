@@ -17,7 +17,6 @@ agents:
 templates:
   memory_templates: "../memory/templates/"
   agent_templates: "../das/agents/"
-  system_prompt: "../system.prompt"
 
 # Overviews  
 overviews:
