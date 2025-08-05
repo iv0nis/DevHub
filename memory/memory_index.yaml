@@ -15,8 +15,10 @@ agents:
 
 # Templates
 templates:
-  memory_templates: "../memory/templates/"
+  memory_templates: "../pms/memory_templates/"
   agent_templates: "../das/agents/"
+  doc_templates: "../docs/doc_templates/"  
+
 
 # Overviews  
 overviews:

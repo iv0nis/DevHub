@@ -1,53 +1,75 @@
-# Backlog Fase 1 · Sprint 2
-fase: 1
-sprint: 2
+# Backlog Fase {PHASE_NUMBER} · Sprint {SPRINT_NUMBER}
+# Template con placeholders para DevHub projects
+fase: {PHASE_NUMBER}
+sprint: {SPRINT_NUMBER}
 historias:
-  US-1.1.1:
-    estado: C          # C = Completed
-    tareas: []
+  {TASK_ID_1}:
+    # Esenciales (E1-E5)
+    id: "{TASK_ID_1}"                    # E1: Identificador único
+    title: "{TASK_TITLE_1}"              # E2: Resumen corto
+    phase: "{PHASE}"                     # E3: Fase/release (F1, F2...)
+    status: "{STATUS}"                   # E4: todo/in-progress/done/blocked
+    priority: "{PRIORITY}"               # E5: P0-P3 o critical-low
+    
+    # Básicos (B1, B5-B7)
+    description: "{DESCRIPTION_1}"       # B1: Qué se necesita y por qué
+    dependencies: [{DEPENDENCIES_1}]     # B5: Array de IDs que deben completarse antes 
+    created_at: "{CREATED_AT_1}"         # B6: ISO-8601, lo rellena el sistema
+    updated_at: "{UPDATED_AT_1}"         # B7: ISO-8601, refresca en cada cambio
+    
+    # Extendidos (X4, X7)
+    blocked_by: "{BLOCKED_BY_1}"          # X4: Motivo textual cuando status=blocked
+    notes:                              # X7: Campo estructurado para observaciones
+      devagent_observations: "{DEVAGENT_NOTES_1}"
+      manual_comments: "{MANUAL_COMMENTS_1}"
+      last_failure_reason: "{FAILURE_REASON_1}"
 
-  US-1.1.2:
-    estado: C
-    tareas: []
+  {TASK_ID_2}:
+    # Esenciales (E1-E5)
+    id: "{TASK_ID_2}"
+    title: "{TASK_TITLE_2}"
+    phase: "{PHASE}"
+    status: "{STATUS_2}"
+    priority: "{PRIORITY_2}"
+    
+    # Básicos (B1, B5-B7)
+    description: "{DESCRIPTION_2}"
+    dependencies: [{DEPENDENCIES_2}]
+    created_at: "{CREATED_AT_2}"
+    updated_at: "{UPDATED_AT_2}"
+    
+    # Extendidos (X4, X7)
+    blocked_by: "{BLOCKED_BY_2}"
+    notes:
+      devagent_observations: "{DEVAGENT_NOTES_2}"
+      manual_comments: "{MANUAL_COMMENTS_2}"
+      last_failure_reason: "{FAILURE_REASON_2}"
 
-  US-1.2.1:
-    estado: P          # P = In-Progress
-    tareas:
-      - id: T-1.2.1a
-        desc: "Crear estructura de directorios"
-        estado: C
-        criticidad: medium
-        
-      - id: T-1.2.1b
-        desc: "Configurar paths en package.json"
-        estado: P
-        criticidad: low
+  {TASK_ID_3}:
+    # Esenciales (E1-E5)
+    id: "{TASK_ID_3}"
+    title: "{TASK_TITLE_3}"
+    phase: "{PHASE}"
+    status: "blocked"                    # Ejemplo de tarea bloqueada
+    priority: "{PRIORITY_3}"
+    
+    # Básicos (B1, B5-B7)
+    description: "{DESCRIPTION_3}"
+    dependencies: ["{TASK_ID_1}", "{TASK_ID_2}"]  # Ejemplo con dependencias
+    created_at: "{CREATED_AT_3}"
+    updated_at: "{UPDATED_AT_3}"
+    
+    # Extendidos (X4, X7) - Ejemplo con bloqueo
+    blocked_by: "Esperando definición de {BLOCKING_REASON}"  # X4 en uso
+    notes:
+      devagent_observations: "Intentos fallidos: {ATTEMPT_COUNT}"
+      manual_comments: "{MANUAL_COMMENTS_3}"
+      last_failure_reason: "{FAILURE_REASON_3}"
 
-  US-1.2.2:
-    estado: P
-    tareas:
-      - id: T-1.2.2a
-        desc: "Crear README principal"
-        estado: C
-        criticidad: low
-        
-      - id: T-1.2.2b
-        desc: "Documentar API endpoints"
-        estado: B          # B = Blocked
-        criticidad: high
-        bloqueado_por: "Esperando definición de endpoints del backend"
-
-  US-1.3.1:
-    estado: P
-    tareas:
-      - id: T-1.3.1a
-        desc: "Implementar login básico"
-        estado: P
-        criticidad: high
-        subtasks:
-          - id: ST-1
-            desc: "Crear formulario login"
-            estado: C
-          - id: ST-2
-            desc: "Validar credenciales"
-            estado: P
+# Comentarios de uso:
+# - Reemplazar todos los placeholders {VARIABLE} con valores reales
+# - status valores: todo, in-progress, done, blocked
+# - priority valores: P0 (crítico), P1 (alto), P2 (medio), P3 (bajo)
+# - dependencies: array de task IDs que deben completarse antes
+# - blocked_by: solo usar cuando status = "blocked"
+# - notes: estructura flexible para diferentes tipos de observaciones
