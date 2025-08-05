@@ -6,3 +6,4 @@ id,author,timestamp,description,status
 5,PMS_Core,2025-07-28T23:10:00Z,Blueprint updated via PMS-Core,merged
 6,PMS_Core,2025-07-28T23:10:00Z,Blueprint updated via PMS-Core,merged
 7,PMS_Core,2025-07-28T23:10:35Z,Blueprint updated via PMS-Core,merged
+8,AiProjectManager,2025-08-05T17:17:19Z,Migrar docs/doc_templates/blueprint.md de estructura temporal a atemporal para alinear con convención blueprint vs roadmap,proposed

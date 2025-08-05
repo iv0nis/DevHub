@@ -1,8 +1,43 @@
+# DevHub Memory Index
+
+# Specs
+specs:
+  devhub: "../docs/DevHub.md"
+  das: "../das/das.md"  
+  pms: "../pms/pms.md"
+
+# Agentes
+agents:
+  ai_project_manager: "../das/agents/AiProjectManager.yaml"
+  blueprint_agent: "../das/agents/BluePrintAgent.yaml"
+  dev_agent: "../das/agents/DevAgent.yaml"
+  qa_agent: "../das/agents/QAAgent.yaml"
+
+# Templates
+templates:
+  memory_templates: "../memory/templates/"
+  agent_templates: "../das/agents/"
+  system_prompt: "../system.prompt"
+
+# Overviews  
+overviews:
+  readme: "../README.md"
+  pms_overview: "../pms/overview.md"
+  das_overview: "../das/overview.md"
+
+# Scripts
+scripts:
+  pms_core: "../pms_core.py"
+  enforcer: "../das/enforcer.py"
+  devhub_cli: "../devhub_cli.py"
+
+# Legacy paths (mantener compatibilidad)
 paths:
   status: "./project_status.md"
   blueprint: "../docs/blueprint.md"
   blueprint_changes: "../docs/blueprint_changes.csv"
   backlog_dir: "../docs/backlog/"
+
 config:
   rollback_dual: true        # transacciones atómicas
   sha_validation: true       # verificación de integridad
