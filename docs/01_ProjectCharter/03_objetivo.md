@@ -4,3 +4,4 @@
   - Sistema PMS estable con rollback atómico
   - DAS enforcer con permisos técnicos
   - Interfaz web MVP para monitoreo de proyectos
+  - Sistema de alineación documental automatizada entre artefactos clave

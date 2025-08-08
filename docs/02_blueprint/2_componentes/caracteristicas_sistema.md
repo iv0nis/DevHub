@@ -18,3 +18,16 @@
 ### Memoria Persistente con Persisten Memory System PMS
 - El sistema de memoria persistente (pms) se ha creado para mejorar la confiabilidad, la credibilidad y la capcidad de los agentes.
 - Las especificaciones del sistema de memoria persistente se encuentran en `pms\pms.md`
+
+### Consistencia Documental Automatizada
+
+DevHub proporciona un sistema activo de alineación entre artefactos estratégicos (Charter, Blueprint, Status, Backlogs), que asegura coherencia operativa y trazabilidad. Esto incluye:
+
+- `project_status.md` como única fuente de verdad del estado actual
+- Hooks automáticos que detectan desalineaciones entre documentos clave
+- Esquemas YAML estrictos para garantizar estados válidos
+- Propagación de cambios (por ejemplo, cambio de fase → actualiza roadmap y backlog)
+- API centralizada vía DAS Enforcer para lectura/escritura de estado
+- Versionado automático con timestamps y changelog estructurado
+
+

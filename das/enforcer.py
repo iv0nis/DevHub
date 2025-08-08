@@ -24,6 +24,8 @@ import logging
 import yaml
 from pathlib import Path
 from typing import Dict, List, Literal, Any, Optional
+import os
+import fnmatch
 
 # Configure logging for violation tracking
 logging.basicConfig(level=logging.INFO)
@@ -40,16 +42,38 @@ class PermissionError(Exception):
 class DASEnforcer:
     """Technical enforcement system for DAS agent permissions"""
     
-    def __init__(self, agents_dir: str = "das/agents"):
+    def __init__(self, agents_dir: str = "das/agent_templates", project_root: str = None):
         """Initialize enforcer with agent configurations directory"""
         self.agents_dir = Path(agents_dir)
+        self.project_root = Path(project_root) if project_root else Path.cwd()
         self.permissions_cache = {}
         self._ensure_agents_dir()
+        self._init_protected_paths()
     
     def _ensure_agents_dir(self):
         """Validate agents directory exists"""
         if not self.agents_dir.exists():
             raise ValueError(f"Agents directory not found: {self.agents_dir}")
+    
+    def _init_protected_paths(self):
+        """Initialize mapping between PMS scopes and filesystem paths"""
+        self.protected_paths = {
+            'blueprint': [
+                'docs/02_blueprint/**/*',
+                'docs/blueprint.md'  # Legacy single file
+            ],
+            'project_charter': [
+                'docs/01_ProjectCharter/**/*',
+                'ProjectCharter.md'  # Legacy single file
+            ],
+            'roadmap': [
+                'docs/03_roadmap/**/*',
+                'roadmap.md'  # Legacy single file
+            ],
+            'backlog_f*': [
+                'docs/04_backlog/backlog_f*.yaml'
+            ]
+        }
     
     def load_agent_permissions(self, agent_id: str) -> Dict[str, Any]:
         """Load and cache agent permissions from YAML config
@@ -110,6 +134,47 @@ class DASEnforcer:
         
         return False
     
+    def _path_matches_scope(self, file_path: str, scope_pattern: str) -> bool:
+        """Check if file path is protected by scope pattern
+        
+        Args:
+            file_path: Absolute or relative file path
+            scope_pattern: PMS scope pattern (e.g., 'blueprint', 'backlog_f*')
+            
+        Returns:
+            True if path is protected by this scope
+        """
+        # Convert absolute path to relative from project root
+        path_obj = Path(file_path)
+        if path_obj.is_absolute():
+            try:
+                rel_path = path_obj.relative_to(self.project_root)
+            except ValueError:
+                # Path not under project root
+                return False
+        else:
+            rel_path = path_obj
+        
+        # Get protected path patterns for this scope
+        if scope_pattern not in self.protected_paths:
+            # Handle wildcard scopes like 'backlog_f*'
+            for scope_key in self.protected_paths:
+                if self._scope_matches(scope_pattern, scope_key):
+                    path_patterns = self.protected_paths[scope_key]
+                    break
+            else:
+                return False
+        else:
+            path_patterns = self.protected_paths[scope_pattern]
+        
+        # Check if file path matches any protected pattern
+        rel_path_str = str(rel_path).replace('\\', '/')  # Normalize separators
+        for pattern in path_patterns:
+            if fnmatch.fnmatch(rel_path_str, pattern):
+                return True
+        
+        return False
+    
     def validate_agent_permissions(
         self, 
         agent_id: str, 
@@ -155,6 +220,54 @@ class DASEnforcer:
                 return True
         
         return False
+    
+    def validate_file_access(
+        self, 
+        agent_id: str, 
+        operation: Literal['read', 'write'], 
+        file_path: str
+    ) -> bool:
+        """Validate if agent has permission to access file path
+        
+        Args:
+            agent_id: Agent requesting access
+            operation: Type of operation ("read" or "write") 
+            file_path: File path being accessed
+            
+        Returns:
+            True if permission granted, False if denied
+        """
+        try:
+            permissions = self.load_agent_permissions(agent_id)
+        except ValueError:
+            # Agent not found - deny by default
+            return False
+        
+        # Skip enforcement if disabled for this agent
+        if not permissions['enforcement_enabled']:
+            return True
+        
+        # Check all scopes that could protect this file
+        for scope_pattern in self.protected_paths.keys():
+            if self._path_matches_scope(file_path, scope_pattern):
+                # File is protected by this scope - check permissions
+                if operation == "read":
+                    allowed_scopes = permissions['read_scopes'] + permissions['write_scopes']
+                elif operation == "write": 
+                    allowed_scopes = permissions['write_scopes']
+                else:
+                    return False
+                
+                # Check if agent has permission for this scope
+                for allowed_pattern in allowed_scopes:
+                    if self._scope_matches(scope_pattern, allowed_pattern):
+                        return True
+                
+                # File is protected but agent lacks permission
+                return False
+        
+        # File is not in any protected path - allow access
+        return True
     
     def log_violation(self, agent_id: str, operation: str, scope: str, message: str):
         """Log permission violation for audit trail"""
@@ -354,6 +467,42 @@ def test_permission(agent_id: str, operation: str, scope: str) -> bool:
     """
     enforcer = get_enforcer()
     return enforcer.validate_agent_permissions(agent_id, operation, scope)
+
+def validate_file_access(agent_id: str, operation: str, file_path: str) -> bool:
+    """Validate if agent can access file path
+    
+    Args:
+        agent_id: Agent requesting access
+        operation: "read" or "write"
+        file_path: File path to validate
+        
+    Returns:
+        True if access allowed, False if denied
+        
+    Raises:
+        PermissionError: If access denied in strict mode
+    """
+    enforcer = get_enforcer()
+    has_permission = enforcer.validate_file_access(agent_id, operation, file_path)
+    
+    if not has_permission:
+        try:
+            agent_config = enforcer.load_agent_permissions(agent_id)
+            strict_mode = agent_config.get('strict_mode', True)
+            log_violations = agent_config.get('log_violations', True)
+        except ValueError:
+            strict_mode = True
+            log_violations = True
+        
+        violation_msg = f"Agent '{agent_id}' denied {operation} access to file '{file_path}'"
+        
+        if log_violations:
+            enforcer.log_violation(agent_id, operation, file_path, violation_msg)
+        
+        if strict_mode:
+            raise PermissionError(violation_msg)
+    
+    return has_permission
 
 # ---------------------------------------------------------------------------
 # Module testing - run with: python -m das.enforcer

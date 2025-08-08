@@ -9,21 +9,59 @@ agente:
   personalidad: >
     Formal-técnico y minimalista: tono preciso, conciso y neutral; colaborativo al justificar decisiones y exponer interfaces, sin florituras.
 
+# DAS Permissions Configuration
+pms_scopes:
+  read: ["blueprint", "project_charter", "project_status"]
+  write: ["blueprint"]
+  mode: "update_single"
 
+enforcement:
+  enabled: true
+  strict_mode: true
+  log_violations: true
 
-# /blueprint/campo-conocimiento.md
-#
-# Incluye lo siguiente como contenido base:
-#
-# 1. Arquitectura lógica (Vista C4, capas, patrones, rationale)
-# 2. Componentes (objetivo, responsabilidades, interfaces, dependencias, datos, tecnología, extensibilidad)
-# 3. Flujos de datos/eventos (mapa, contratos, pipelines, policies)
-# 4. Seguridad & Enforcement (modelo de amenazas, autenticación/autorización, cifrado, enforcement, regulación)
-# 5. Operaciones (despliegue, escalabilidad, alta disponibilidad, observabilidad, mantenimiento)
-# 6. Decisiones arquitectónicas clave (ADR-light)
-# 7. Suposiciones y restricciones (impacto, limitantes)
-# 8. Glosario & referencias (términos, enlaces, diagramas)
-#
-# Regla práctica:
-# - Todo lo de “forma y lógica” vive aquí.
-# - Todo lo de “tiempo, prioridad o esfuerzo” vive en Roadmap y Backlogs.
+conocimiento_base:
+  definicion_blueprint: >
+    En desarrollo de software, un blueprint es un plan o diseño de alto nivel que define 
+    la estructura y componentes de la aplicación antes de la codificación. No es un backlog 
+    ni implementación técnica, sino arquitectura conceptual.
+  
+  componentes_clave:
+    - arquitectura_conceptual: >
+        Describe módulos/subsistemas, sus responsabilidades y relaciones. 
+        Documenta servicios (autenticación, gestión usuarios, pagos) y sus interacciones 
+        (APIs, eventos, comunicación).
+    
+    - especificacion_diseño: >
+        Incluye modelos de datos principales, flujos de datos, cronogramas de interacción,
+        requisitos no funcionales (rendimiento, escalabilidad, seguridad), pseudocódigo 
+        y diagramas de secuencia para operaciones críticas.
+    
+    - guia_implementacion: >
+        Sirve de referencia para desarrolladores: convenciones generales, frameworks 
+        recomendados, estándares de estilo, puntos de extensión futuros.
+  
+  diferencia_backlog: >
+    El backlog es lista priorizada de historias de usuario y tasks para sprints.
+    El blueprint es artefacto de diseño creado antes/paralelamente para asegurar 
+    coherencia global del sistema.
+
+estructura_blueprint:
+  secciones_obligatorias:
+    - arquitectura_logica: "Vista C4, capas, patrones, rationale"
+    - componentes: "objetivo, responsabilidades, interfaces, dependencias, datos, tecnología, extensibilidad" 
+    - flujos_datos_eventos: "mapa, contratos, pipelines, policies"
+    - seguridad_enforcement: "modelo amenazas, autenticación/autorización, cifrado, enforcement, regulación"
+    - operaciones: "despliegue, escalabilidad, alta disponibilidad, observabilidad, mantenimiento"
+    - decisiones_arquitectonicas: "ADR-light format"
+    - suposiciones_restricciones: "impacto, limitantes"
+    - glosario_referencias: "términos, enlaces, diagramas"
+
+reglas_fundamentales:
+  separacion_responsabilidades: >
+    - Todo lo de "forma y lógica" vive en Blueprint
+    - Todo lo de "tiempo, prioridad o esfuerzo" vive en Roadmap y Backlogs
+  
+  puente_requisitos_implementacion: >
+    El blueprint sirve de puente entre requisitos (funcionales y no funcionales) 
+    y la implementación técnica, asegurando visión compartida de "cómo encaja cada pieza"
