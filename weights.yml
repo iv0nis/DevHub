@@ -1,0 +1,13 @@
+# Blueprint Completeness Evaluation Weights
+# Each check contributes to final score based on these weights
+# Total should sum to 1.0
+
+structural_sections: 0.15   # Required sections present in blueprint
+objectives_coverage: 0.15   # Charter objectives mapped to blueprint components  
+functional_coverage: 0.25   # Functional requirements covered by flows/APIs
+nfr_coverage: 0.20         # Non-functional requirements addressed
+constraints_mapped: 0.15    # Charter constraints reflected in ADRs
+glossary_consistency: 0.10  # Terminology consistency between docs
+
+# Note: Functional coverage has highest weight as it's most critical
+# for development team to have clear implementation guidance

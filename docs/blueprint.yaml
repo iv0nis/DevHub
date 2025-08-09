@@ -1,0 +1,232 @@
+version: "2.0"
+last_modified: "2025-08-08"
+project_name: "DevHub"
+sha1_hash: "8d4b133d8ccaa36328c4c3ecccf97ec35fe3c892"
+source_structure: "docs/02_blueprint/"
+
+metadata:
+  description: "Sistema de gestión de proyectos con agentes autónomos"
+  type: "framework"
+  category: "development_platform"
+
+arquitectura:
+  stack_tecnologico:
+    lenguajes: ["Python"]
+    frameworks: ["Next.js", "Flask"]
+    almacenamiento: ["YAML", "Markdown", "CSV"]
+    infraestructura: ["Git", "Filesystem"]
+  
+  patrones_arquitectonicos:
+    patron_principal: "Modular Multi-Agent Architecture"
+    estructura: ["PMS Layer", "DAS Layer", "UI Layer"]
+    comunicacion: "File-based + Event-driven"
+  
+  pilares_fundamentales:
+    - nombre: "PMS"
+      descripcion: "Persistent Memory System - Sistema de memoria persistente"
+      responsabilidad: "Gestión confiable y consistente del estado del proyecto"
+    - nombre: "DAS" 
+      descripcion: "DevAgent System - Sistema de agentes autónomos"
+      responsabilidad: "Orquestación y enforcement de permisos de agentes"
+    - nombre: "UI"
+      descripcion: "User Interface - Interface de usuario"
+      responsabilidad: "Interacción humana y monitoreo del sistema"
+
+componentes:
+  agentes:
+    DevAgent:
+      proposito: "Ejecutor de tareas de desarrollo"
+      responsabilidades:
+        - "Ejecutar tareas siguiendo blueprint y backlog"
+        - "Actualizar estado del proyecto automáticamente" 
+        - "Proponer cambios al blueprint cuando es necesario"
+      interfaces: ["agent_load", "agent_save", "blueprint_changes.csv"]
+      tecnologia: "Python YAML config"
+      permisos:
+        read: ["backlog_f*", "blueprint", "project_status"]
+        write: ["backlog_f*", "project_status", "blueprint_changes"]
+    
+    BlueprintAgent:
+      proposito: "Custodio único del blueprint"
+      responsabilidades:
+        - "Único autorizado para modificar blueprint.md"
+        - "Procesar propuestas via blueprint_changes.csv"
+        - "Mantener versionado y changelog del blueprint"
+      interfaces: ["agent_load", "agent_save", "blueprint"]
+      tecnologia: "Python YAML config"
+      permisos:
+        read: ["blueprint", "project_charter", "project_status"]
+        write: ["blueprint"]
+    
+    AiProjectManager:
+      proposito: "Coordinador de visión general"
+      responsabilidades:
+        - "Gestionar visión general del proyecto"
+        - "Coordinar flujo entre documentos"
+        - "Solo lectura de Blueprint y Backlogs"
+      interfaces: ["agent_load"]
+      tecnologia: "Python YAML config"
+      permisos:
+        read: ["blueprint", "backlog_f*", "project_status"]
+        write: []
+  
+  sistemas:
+    PMS:
+      proposito: "Sistema de memoria persistente"
+      responsabilidades:
+        - "Mejorar confiabilidad de agentes"
+        - "Garantizar consistencia de datos"
+        - "Proveer rollback atómico"
+      interfaces: ["load", "save", "rollback"]
+      tecnologia: "Python con validación SHA-1"
+      especificacion: "pms/pms.md"
+    
+    DAS_Enforcer:
+      proposito: "Sistema de enforcement de permisos"
+      responsabilidades:
+        - "Orquestar múltiples agentes"
+        - "Limitar acceso según permisos definidos"
+        - "Validar operaciones en tiempo real"
+      interfaces: ["agent_load", "agent_save", "validate_file_access"]
+      tecnologia: "Python con mapeo filesystem"
+      especificacion: "das/das.md"
+
+caracteristicas:
+  independencia_proyectos:
+    descripcion: "Cada proyecto completamente aislado"
+    implementacion:
+      - "pms_core.py configurado localmente por proyecto"
+      - "enforcer.py con restricciones específicas"
+      - "agentes configurados para contexto del proyecto"
+  
+  backlogs_multifase:
+    descripcion: "Gestión de desarrollo por fases"
+    implementacion:
+      - "backlog_f1.yaml, backlog_f2.yaml, etc."
+      - "backlog.md para documentación de sprints"
+      - "DevAgent trabaja con cualquier fase según estado"
+  
+  templates_configurables:
+    descripcion: "Reutilización y escalabilidad"
+    implementacion:
+      - "memory_templates/ para archivos de memoria"
+      - "agent_templates/ para system prompts"
+      - "Configuración YAML para personalización"
+  
+  consistencia_documental:
+    descripcion: "Alineación automatizada entre artefactos"
+    implementacion:
+      - "project_status.md como fuente de verdad única"
+      - "Hooks automáticos para detectar desalineaciones"
+      - "Esquemas YAML estrictos para estados válidos"
+      - "Propagación automática de cambios"
+      - "API centralizada vía DAS Enforcer"
+      - "Versionado automático con timestamps"
+
+flujos_datos_eventos:
+  # PENDIENTE: Esta sección está vacía en la estructura modular
+  estado: "no_documentado"
+  notas: "Directorio 3_flujos_datos_eventos/ completamente vacío"
+
+seguridad_enforcement:
+  permisos_por_proyecto:
+    descripcion: "Sistema de permisos independiente por proyecto"
+    implementacion: "das/das.md por proyecto"
+    configuracion_independiente: true
+  
+  control_acceso_tecnico:
+    enforcement_automatico:
+      - "Violaciones registradas y bloqueadas automáticamente"
+      - "Sistema DAS enforcer con validación en tiempo real"
+    
+  auditoria_trazabilidad:
+    caracteristicas:
+      - "Sistema completo de auditoría para todas las operaciones"
+      - "Logging automático de violaciones de permisos"
+      - "Registro de cambios para compliance y debugging"
+  
+  proteccion_archivos_criticos:
+    blueprint_protection:
+      agente_autorizado: "BlueprintAgent"
+      acceso: "solo_escritura"
+    project_charter_protection:
+      acceso: "protegido_modificaciones_no_autorizadas"
+    sistema_backups: "automático para documentos críticos"
+  
+  enforcement_tecnico_scopes:
+    mapeo: "scopes PMS a rutas filesystem"
+    validacion: "permisos antes de operaciones read/write"
+    bloqueo: "automático de accesos no autorizados"
+
+operaciones:
+  escalabilidad:
+    horizontal:
+      - "Proyectos completamente independientes"
+      - "Replicación fácil de configuraciones exitosas"
+      - "Colaboración entre múltiples desarrolladores"
+    vertical:
+      - "Gestión de múltiples fases de desarrollo"
+      - "Integración con sistemas CI/CD"
+    puntos_escalado:
+      - "Templates reutilizables"
+      - "Configuración por proyecto"
+      - "Sistema de permisos granular"
+
+decisiones_arquitectonicas:
+  estructura_proyectos_generados:
+    contexto: "Necesidad de estructura estándar para proyectos creados con DevHub"
+    decision: "Template fijo con carpetas obligatorias"
+    rationale: "Facilita gestión y escalabilidad"
+    estructura:
+      raiz: ["README.md", "pms_core.py", "enforcer.py"]
+      agents: ["DevAgent.yaml", "BlueprintAgent.yaml", "AiProjectManager.yaml"]
+      docs: ["ProjectCharter.md", "roadmap.md", "blueprint.md", "blueprint_changes.csv"]
+      backlog: ["backlog.md", "backlog_f1.yaml", "backlog_f2.yaml", "backlog_fN.yaml"]
+      memory: ["memory_index.yaml", "project_status.md"]
+  
+  estructura_base_devhub:
+    contexto: "Organización del framework DevHub central"
+    decision: "Separación entre core system y templates"
+    rationale: "Facilita mantenimiento y distribución"
+    estructura:
+      raiz: ["CLAUDE.md", "README.md", "devhub_cli.py"]
+      pms: ["pms_core.py", "memory_templates/"]
+      das: ["enforcer.py", "agent_templates/"]
+      docs: ["documentación del framework"]
+
+suposiciones_restricciones:
+  suposiciones:
+    - "Los proyectos seguirán la estructura estándar definida"
+    - "Los agentes respetarán el sistema de permisos DAS"
+    - "Git será usado para versionado y colaboración"
+  
+  restricciones:
+    tecnicas:
+      - "Dependencia de filesystem para persistencia"
+      - "Configuración YAML para agentes"
+      - "Python como lenguaje principal del core"
+    organizacionales:
+      - "Cualquier modificación debe ser documentada"
+      - "Comunicación obligatoria al equipo de desarrollo"
+    regulatorias:
+      - "Sistema de auditoría completo requerido"
+      - "Trazabilidad de cambios obligatoria"
+
+glosario:
+  PMS: "Persistent Memory System - Sistema de memoria persistente para agentes"
+  DAS: "DevAgent System - Sistema de orquestación y permisos de agentes"
+  Blueprint: "Documento HLD que define arquitectura y estructura del sistema"
+  Backlog: "Lista priorizada de tareas por fases de desarrollo"
+  Agent_Templates: "Plantillas YAML para configuración de system prompts de agentes"
+  Memory_Templates: "Plantillas para archivos de memoria y estado de proyecto"
+  Enforcement: "Sistema técnico de validación y bloqueo de permisos"
+  Scope: "Ámbito de acceso definido en permisos de agente (ej: blueprint, backlog_f1)"
+
+referencias:
+  especificaciones:
+    - "pms/pms.md - Especificación completa del sistema PMS"
+    - "das/das.md - Especificación completa del sistema DAS"
+  documentacion_modular:
+    - "docs/02_blueprint/ - Estructura modular fuente de este YAML"
+  templates:
+    - "docs/doc_templates/ - Templates para nuevos proyectos"
