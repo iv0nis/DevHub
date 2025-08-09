@@ -1,7 +1,7 @@
-version: "2.0"
-last_modified: "2025-08-08"
+version: "2.2"
+last_modified: "2025-08-09"
 project_name: "DevHub"
-sha1_hash: "8d4b133d8ccaa36328c4c3ecccf97ec35fe3c892"
+sha1_hash: "082461c24f473da069a32b994fdf8513bdf3822e"
 source_structure: "docs/02_blueprint/"
 
 metadata:
@@ -10,6 +10,8 @@ metadata:
   category: "development_platform"
 
 arquitectura:
+  descripcion: "La arquitectura de DevHub se basa en una estructura modular que permite la creación y gestión de proyectos de desarrollo de software de manera eficiente"
+  
   stack_tecnologico:
     lenguajes: ["Python"]
     frameworks: ["Next.js", "Flask"]
@@ -25,14 +27,48 @@ arquitectura:
     - nombre: "PMS"
       descripcion: "Persistent Memory System - Sistema de memoria persistente"
       responsabilidad: "Gestión confiable y consistente del estado del proyecto"
+      especificacion: "pms/pms.md"
     - nombre: "DAS" 
       descripcion: "DevAgent System - Sistema de agentes autónomos"
       responsabilidad: "Orquestación y enforcement de permisos de agentes"
+      especificacion: "das/das.md"
     - nombre: "UI"
       descripcion: "User Interface - Interface de usuario"
       responsabilidad: "Interacción humana y monitoreo del sistema"
 
 componentes:
+  # MAPEO DIRECTO CHARTER → ARQUITECTURA
+  charter_mapping:
+    objetivo_cli_funcional:
+      charter_requirement: "CLI funcional para creación automática de proyectos"
+      blueprint_component: "devhub_cli.py"
+      implementation: "Script Python que genera estructura de proyectos completa"
+      interfaces: ["create_project", "validate_structure", "init_templates"]
+    
+    objetivo_pms_sistema:
+      charter_requirement: "Sistema PMS estable con rollback atómico" 
+      blueprint_component: "pms_core.py"
+      implementation: "Sistema de memoria persistente con validación SHA-1"
+      interfaces: ["load", "save", "rollback", "validate_integrity"]
+    
+    objetivo_das_enforcer:
+      charter_requirement: "DAS enforcer con permisos técnicos"
+      blueprint_component: "enforcer.py"
+      implementation: "Sistema de orquestación con mapeo filesystem"
+      interfaces: ["agent_load", "agent_save", "validate_file_access"]
+    
+    objetivo_interfaz_web:
+      charter_requirement: "Interfaz web MVP para monitoreo de proyectos"
+      blueprint_component: "UI/Next.js"
+      implementation: "Dashboard web para visualización de estado y métricas"
+      interfaces: ["project_dashboard", "agent_status", "metrics_view"]
+    
+    objetivo_alineacion_documental:
+      charter_requirement: "Sistema de alineación documental automatizada"
+      blueprint_component: "auto_sync_system"
+      implementation: "Hooks y validación automática entre artefactos"
+      interfaces: ["sync_documents", "validate_alignment", "trigger_updates"]
+
   agentes:
     DevAgent:
       proposito: "Ejecutor de tareas de desarrollo"
@@ -107,11 +143,14 @@ caracteristicas:
       - "DevAgent trabaja con cualquier fase según estado"
   
   templates_configurables:
-    descripcion: "Reutilización y escalabilidad"
+    descripcion: "Los templates de memoria y agentes son configurables y reutilizables"
     implementacion:
-      - "memory_templates/ para archivos de memoria"
-      - "agent_templates/ para system prompts"
+      - "memory_templates/ contiene los templates de memoria"
+      - "agent_templates/ contiene los system prompts de los agentes"
       - "Configuración YAML para personalización"
+    ubicaciones:
+      memory_templates: "pms/memory_templates/"
+      agent_templates: "das/agent_templates/"
   
   consistencia_documental:
     descripcion: "Alineación automatizada entre artefactos"
@@ -124,9 +163,158 @@ caracteristicas:
       - "Versionado automático con timestamps"
 
 flujos_datos_eventos:
-  # PENDIENTE: Esta sección está vacía en la estructura modular
-  estado: "no_documentado"
-  notas: "Directorio 3_flujos_datos_eventos/ completamente vacío"
+  estado: "documentado"
+  descripcion: "Flujo controlado y trazable de 7 pasos para insertar nuevas funcionalidades, garantizando integridad documental y arquitectónica mediante sincronización modular"
+  
+  arquitectura_comunicacion:
+    patron: "File-Based + Event-Driven"
+    persistencia: "Archivos YAML/MD como medium de intercambio"
+    coordinacion: "DAS Enforcer orquesta acceso y permisos"
+    eventos: "Cambios en filesystem generan eventos de sincronización"
+  
+  workflow_features:
+    descripcion: "Flujo de 7 pasos para desarrollo de features"
+    pasos:
+      - paso: 1
+        nombre: "Idea → Validación (Charter/alcance)"
+        input: "Feature request del usuario"
+        output: "Feature validada | Feature rechazada"
+        contratos:
+          input_format: "{feature_description, business_value, technical_requirements}"
+          output_format: "{validation_result, impact_assessment, approval_status}"
+      
+      - paso: 2
+        nombre: "Propuesta → blueprint_changes.csv → Review"
+        proceso: "DevAgent crea propuesta, BlueprintAgent evalúa completitud"
+        validacion: "Blueprint completeness ≥80% requerido"
+        contratos:
+          input_format: "CSV con section,change_type,description,rationale,impact"
+          output_format: "blueprint.yaml actualizado"
+      
+      - paso: 3
+        nombre: "Blueprint (módulo) → Sync → Integridad"
+        proceso: "Actualización modular → Regeneración YAML → Validación SHA-1 → CI"
+        eventos_tecnicos:
+          - "blueprint.updated → Trigger regeneración YAML"
+          - "integrity.validated → SHA-1 hash updated"
+          - "ci.validation.passed → Ready for next step"
+      
+      - paso: 4
+        nombre: "TechSpec (módulo) → ADR si hay decisión clave"
+        prerequisito: "Blueprint ≥ 80% + feature especificada"
+        output: "docs/03_techspecs/{feature_name}.md"
+        trigger_adr: "Si impact=high en blueprint_changes"
+      
+      - paso: 5
+        nombre: "Roadmap (módulo) → Sync"
+        proceso: "Actualización roadmap con nueva épica → Sincronización timeline"
+        pipeline: "Blueprint → TechSpecs → Roadmap → Backlog"
+      
+      - paso: 6
+        nombre: "Backlog (módulo) → Sync"
+        proceso: "Descomposición en user stories + tasks → Asignación a fase"
+        formato_datos:
+          estructura: "backlog_f{N}.yaml"
+          campos: "id, feature, type, priority, estimation, dependencies, acceptance_criteria"
+      
+      - paso: 7
+        nombre: "Status (update)"
+        proceso: "Actualización project_status.md → Log cambios → Notificación stakeholders"
+    
+    puntos_control:
+      humanos:
+        - "Validación inicial contra charter"
+        - "Review de propuestas (calidad + estrategia)"
+        - "Supervisión de decisiones arquitectónicas críticas"
+      tecnicos:
+        - "SHA/CI enforcement automático"
+        - "DAS permissions por agente"
+        - "Auto-sync entre documentos"
+    
+    beneficios:
+      - "UX sin fricción (proceso encapsulado)"
+      - "Governance robusta (review dual)"
+      - "Integridad técnica (enforcement automático)"
+      - "Trazabilidad completa (idea → código)"
+  
+  contratos_agentes:
+    descripcion: "Contratos de datos e interfaces estándar para comunicación entre agentes"
+    
+    blueprintagent:
+      interfaces_entrada:
+        blueprint_changes_csv:
+          campos: "section, change_type, description, rationale, impact, proposed_by, timestamp"
+          tipos: "str, enum[add|update|remove], str, str, enum[low|medium|high], str, datetime"
+      
+      interfaces_salida:
+        blueprint_yaml:
+          campos: "version, last_modified, sha1_hash, components"
+          estructura: "charter_mapping, agentes, sistemas"
+    
+    devagent:
+      interfaces_entrada:
+        backlog_tasks:
+          campos: "id, feature, type, priority, estimation, dependencies, acceptance_criteria, assigned_to, status"
+          tipos_status: "pending|in_progress|completed|blocked"
+      
+      interfaces_salida:
+        project_status_updates:
+          campos: "current_state, last_activity"
+          metricas: "fase_actual, tasks_completed, tasks_pending, blockers"
+    
+    aiprojectmanager:
+      interfaces_entrada:
+        multiple_sources:
+          blueprint_status: "completeness, gaps"
+          backlog_status: "phases, velocity"
+          project_metrics: "timeline_health, quality_metrics"
+      
+      interfaces_salida:
+        reports:
+          project_dashboard: "overall_health, key_metrics, recommendations, next_priorities"
+          stakeholder_updates: "progress_summary, completed_milestones, upcoming_deliverables, risks_and_mitigations"
+    
+    sincronizacion:
+      pms_operations:
+        - "load(scope: str) -> dict: Carga datos con validación de integridad"
+        - "save(scope: str, data: dict) -> bool: Guarda con transacción atómica"
+        - "rollback(scope: str, version: str) -> bool: Rollback a versión anterior"
+      
+      das_validations:
+        - "validate_agent_permissions: Valida permisos antes de operación"
+        - "log_access_attempt: Registra intentos de acceso para auditoría"
+        - "trigger_sync_event: Dispara eventos de sincronización"
+      
+      politicas:
+        orden_precedencia: "BlueprintAgent > DevAgent > AiProjectManager"
+        resolucion_conflictos: "Timestamp más reciente prevalece"
+        estados_sync: "last_sync, pending_changes, conflicts, integrity_check"
+  
+  eventos_sistema:
+    negocio:
+      - "feature.requested → Inicia workflow"
+      - "feature.approved → Procede a blueprint"
+      - "blueprint.ready → Procede a techspecs"
+      - "development.completed → Update status"
+    
+    tecnicos:
+      - "document.modified → Trigger sync"
+      - "integrity.violated → Trigger rollback"
+      - "permission.denied → Log violation"
+      - "sync.completed → Update timestamps"
+  
+  metricas_observabilidad:
+    kpis_flujo:
+      - "Time to backlog: Idea → Task executable"
+      - "Blueprint completeness: % vs Charter"
+      - "Sync success rate: Consistencia documental"
+      - "Agent efficiency: Tasks/hour por agente"
+    
+    alertas_automaticas:
+      - "Blueprint completeness < 80%"
+      - "Documentos desincronizados > 24h"
+      - "Violaciones de permisos repetidas"
+      - "CI validation failures"
 
 seguridad_enforcement:
   permisos_por_proyecto:
@@ -160,6 +348,7 @@ seguridad_enforcement:
 
 operaciones:
   escalabilidad:
+    descripcion: "Esta estructura permite escalabilidad horizontal y vertical"
     horizontal:
       - "Proyectos completamente independientes"
       - "Replicación fácil de configuraciones exitosas"
@@ -171,12 +360,204 @@ operaciones:
       - "Templates reutilizables"
       - "Configuración por proyecto"
       - "Sistema de permisos granular"
+  
+  developer_tooling:
+    auto_sync_documentacion:
+      descripcion: "Sistema automático para detectar y sincronizar cambios entre la estructura modular docs/02_blueprint/ y el archivo consolidado blueprint.yaml"
+      estado: "Future Feature (Provisional)"
+      problema_identificado:
+        - "El archivo blueprint.yaml se desactualiza cuando se modifican los módulos"
+        - "Sincronización manual propensa a errores y olvidos"
+        - "Documentación inconsistente afecta la confiabilidad del sistema"
+      propuesta_tecnica:
+        implementacion_fase: 3
+        componentes:
+          - "Validación SHA-1 + hooks CI para detección automática de cambios"
+          - "Script de sincronización: docs/02_blueprint/ → blueprint.yaml"
+          - "Plan de evolución: wrapper FS 'SafeFS' para enforcement técnico completo"
+      casos_uso:
+        - "Developer edita docs/02_blueprint/1_arquitectura/stack.md"
+        - "Sistema detecta cambio via SHA-1 validation"
+        - "Auto-sync ejecuta regeneración de blueprint.yaml"
+        - "Commit automático o notificación para review"
+      beneficios:
+        - "Eliminación de drift entre modular y consolidado"
+        - "Mejora DX (Developer Experience)"
+        - "Documentación siempre confiable"
+        - "Reducción de errores humanos"
+      consideraciones:
+        - "Integración con sistema PMS existente"
+        - "Compatibilidad con workflow Git actual"
+        - "Performance en proyectos grandes"
+        - "Manejo de conflictos de merge"
 
 decisiones_arquitectonicas:
+  adr_001_arquitectura_local_filesystem:
+    estado: "Aceptado"
+    fecha: "2025-08-09"
+    contexto: "Charter especifica que hosting/infraestructura en nube está Out-of-Scope para DevHub v1.0"
+    decision: "Implementar DevHub con arquitectura filesystem-based local"
+    rationale:
+      - "Alineación Charter: Cumple restricción explícita 'No hosting en nube'"
+      - "Simplicidad: Reduce complejidad operacional y dependencias"
+      - "Portabilidad: Funciona en cualquier entorno con Python + Git"
+      - "Control: Usuario mantiene control total de sus datos"
+      - "Performance: Acceso directo a filesystem es más rápido que red"
+    implementacion:
+      persistencia: "archivos YAML/Markdown locales"
+      dependencias: "No bases de datos externas"
+      conectividad: "No requerimientos de nube"
+      ejecucion: "Completa en máquina del desarrollador"
+    consecuencias:
+      positivas:
+        - "Zero setup infrastructure"
+        - "Funciona offline completamente"
+        - "Control total de datos por usuario"
+        - "Backup simple (Git + filesystem)"
+        - "No costos de hosting"
+      negativas:
+        - "No colaboración real-time entre máquinas"
+        - "Backup manual requerido"
+        - "Escalabilidad limitada por I/O local"
+        - "No centralización de métricas"
+      mitigaciones:
+        - "Git para versionado y colaboración asíncrona"
+        - "Scripts de backup automático"
+        - "Optimización I/O con caching"
+        - "Export de métricas para agregación externa"
+    revisar: "Cuando se considere DevHub v2.0 con capacidades cloud"
+  
+  adr_002_single_tenant_por_proyecto:
+    estado: "Aceptado"
+    fecha: "2025-08-09"
+    contexto: "Charter especifica que multi-tenant entre organizaciones está Out-of-Scope"
+    decision: "Implementar modelo 'Un proyecto = Una instancia DevHub'"
+    rationale:
+      - "Alineación Charter: Cumple restricción 'No multi-tenant'"
+      - "Seguridad: Aislamiento completo entre proyectos"
+      - "Simplicidad: No lógica compleja de multi-tenancy"
+      - "Personalización: Configuración específica por proyecto"
+      - "Escalabilidad: Proyectos crecen independientemente"
+    implementacion:
+      modelo: "Cada proyecto tiene su propia instancia completa de DevHub"
+      configuracion: "Independiente (pms_core.py, enforcer.py, agentes)"
+      aislamiento: "Datos completamente aislados por proyecto"
+      recursos: "No compartición entre proyectos"
+      estructura_ejemplo: |
+        DevHub_Framework/          # Templates y core
+        ├── pms/templates/
+        ├── das/agent_templates/
+        └── docs/doc_templates/
+        
+        Project_Alpha/            # Instancia específica
+        ├── pms_core.py          # Configurado para Alpha
+        ├── enforcer.py          # Permisos específicos Alpha  
+        ├── agents/              # System prompts Alpha
+        └── docs/               # Documentos Alpha
+    beneficios_tecnicos:
+      - "Configuración granular: Cada proyecto puede tener reglas DAS específicas"
+      - "Evolución independiente: Un proyecto no afecta otros"
+      - "Backup selectivo: Respaldo por proyecto según criticidad"
+      - "Debugging aislado: Problemas no se propagan"
+    consecuencias:
+      positivas:
+        - "Aislamiento completo de datos"
+        - "Configuración personalizable por proyecto"
+        - "Debugging y troubleshooting simplificado"
+        - "Escalabilidad horizontal natural"
+        - "Backup/restore granular"
+      negativas:
+        - "Duplicación de configuraciones similares"
+        - "Mantenimiento múltiple de instancias"
+        - "No economías de escala en recursos"
+        - "Sincronización manual entre proyectos relacionados"
+      mitigaciones:
+        - "Templates para configuración rápida de nuevos proyectos"
+        - "Scripts de sincronización para proyectos relacionados"
+        - "Tooling para gestión masiva de instancias"
+        - "Documentación de best practices"
+    revisar: "Si el feedback del usuario indica necesidad de gestión centralizada"
+  
+  adr_003_cli_web_interfaces:
+    estado: "Aceptado"
+    fecha: "2025-08-09"
+    contexto: "Charter especifica que integración profunda con IDEs externos está Out-of-Scope"
+    decision: "Priorizar CLI + Web Dashboard como interfaces primarias"
+    rationale:
+      - "Alineación Charter: Cumple restricción 'No integración profunda IDEs'"
+      - "Universalidad: CLI funciona en cualquier terminal/IDE"
+      - "Flexibilidad: Web accessible desde cualquier browser"
+      - "Simplicidad: No desarrollo de plugins específicos por IDE"
+      - "Mantenibilidad: Menos superficie de testing y soporte"
+    implementacion:
+      cli_operations:
+        - "devhub create-project <name>: Crear nuevo proyecto"
+        - "devhub validate-structure: Validar integridad"
+        - "devhub sync-documents: Sincronizar artefactos"
+        - "devhub evaluate-blueprint: Evaluar completitud"
+        - "devhub agent-run <agent> <task>: Ejecutar agente específico"
+      web_dashboard:
+        - "Project Overview: Estado general del proyecto"
+        - "Blueprint Status: Completitud y gaps identificados"
+        - "Agent Activity: Log de acciones de agentes"
+        - "Document Sync: Estado de sincronización entre artefactos"
+        - "Metrics Dashboard: KPIs de desarrollo"
+      apis_basicas:
+        - "GET /api/project/status: Estado actual"
+        - "GET /api/blueprint/completeness: Porcentaje completitud"
+        - "POST /api/agents/run: Trigger agente"
+        - "GET /api/documents/sync-status: Estado sincronización"
+    integracion_workflow:
+      desarrollo: "CLI para tareas técnicas (sync, validate, run agents)"
+      monitoreo: "Web dashboard para tracking y métricas"
+      reporting: "APIs para herramientas externas de reporting"
+      colaboracion: "Web para compartir estado con stakeholders"
+    consecuencias:
+      positivas:
+        - "Compatibilidad universal (cualquier editor/IDE)"
+        - "Desarrollo y mantenimiento simplificado"
+        - "Testing más sencillo (menos interfaces)"
+        - "Documentación concentrada"
+        - "Flexibilidad para integraciones futuras"
+      negativas:
+        - "No features avanzadas de IDE (autocomplete, debugging)"
+        - "Context switching entre herramientas"
+        - "Menor productividad vs deep integration"
+        - "Curva de aprendizaje de CLI"
+      mitigaciones:
+        - "CLI con autocompletado y help contextual"
+        - "Web dashboard responsive para uso en segunda pantalla"
+        - "APIs documentadas para integraciones custom"
+        - "Shortcuts y aliases para comandos frecuentes"
+        - "Plugins simples para IDEs populares (futuro v2.0)"
+    revisar: "Basado en feedback de desarrolladores sobre friction en workflow"
+  
   estructura_proyectos_generados:
     contexto: "Necesidad de estructura estándar para proyectos creados con DevHub"
     decision: "Template fijo con carpetas obligatorias"
-    rationale: "Facilita gestión y escalabilidad"
+    rationale: "Cada proyecto creado con DevHub sigue una estructura estándar que permite la fácil gestión y escalabilidad"
+    estructura_detallada: |
+      project_name/
+      ├── README.md                   # Documentación del proyecto
+      ├── pms_core.py                # PMS configurado para proyecto local
+      ├── enforcer.py                # DAS enforcer configurado localmente
+      ├── agents/                    # Agentes del proyecto
+      │   ├── DevAgent.yaml          # DevAgent configurado para proyecto
+      │   ├── BluePrintAgent.yaml    # BluePrintAgent configurado
+      │   └── AiProjectManager.yaml  # AiProjectManager configurado
+      ├── docs/                      # Documentación del proyecto
+      │   ├── ProjectCharter.md      # Visión y alcance del proyecto
+      │   ├── roadmap.md            # Roadmap de implementación
+      │   ├── blueprint.md          # Especificación técnica detallada
+      │   ├── blueprint_changes.csv # Propuestas de cambios al blueprint
+      │   └── backlog/              # Sistema de backlogs por fases
+      │       ├── backlog.md        # Documentación del sistema backlog
+      │       ├── backlog_f1.yaml   # Backlog Fase 1
+      │       ├── backlog_f2.yaml   # Backlog Fase 2
+      │       └── backlog_fN.yaml   # Backlog Fase N
+      ├── memory/                    # Sistema de memoria persistente
+      │   ├── memory_index.yaml     # Configuración de rutas del proyecto
+      │   └── project_status.md     # Estado actual del proyecto
     estructura:
       raiz: ["README.md", "pms_core.py", "enforcer.py"]
       agents: ["DevAgent.yaml", "BlueprintAgent.yaml", "AiProjectManager.yaml"]
@@ -188,6 +569,24 @@ decisiones_arquitectonicas:
     contexto: "Organización del framework DevHub central"
     decision: "Separación entre core system y templates"
     rationale: "Facilita mantenimiento y distribución"
+    estructura_detallada: |
+      DevHub/                          # Repositorio DevHub central
+      ├── CLAUDE.md                    # Configuración Claude Code
+      ├── README.md                    # Documentación principal
+      ├── devhub_cli.py               # CLI para creación de proyectos
+      ├── pms/                        # Sistema PMS central
+      │   ├── pms_core.py            # 
+      │   └── memory_templates/             # Templates de los archivos de memoria
+      │       ├── memory_index.yaml  # Template para el Índice de memoria
+      │       └── project_status.md   # Template para el estado del proyecto y registro de tareas ejecutadas
+      ├── das/                        # Sistema DAS central
+      │   ├── enforcer.py            # 
+      │   └── agent_templates/                # Templates de system prompts de los agentes
+      │       ├── DevAgent.yaml      # Template DevAgent
+      │       ├── BluePrintAgent.yaml # Template BluePrintAgent
+      │       └── AiProjectManager.yaml # Template AiProjectManager
+      └── docs/                       # Documentación DevHub
+          └── DevHub.md              # Este archivo
     estructura:
       raiz: ["CLAUDE.md", "README.md", "devhub_cli.py"]
       pms: ["pms_core.py", "memory_templates/"]
@@ -195,6 +594,8 @@ decisiones_arquitectonicas:
       docs: ["documentación del framework"]
 
 suposiciones_restricciones:
+  nota_documento: "Este documento define la estructura estándar para todos los proyectos DevHub. Cualquier modificación debe ser documentada y comunicada al equipo de desarrollo."
+  
   suposiciones:
     - "Los proyectos seguirán la estructura estándar definida"
     - "Los agentes respetarán el sistema de permisos DAS"

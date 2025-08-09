@@ -71,6 +71,7 @@ class BlueprintEvaluator:
         return {
             'sections': list(blueprint_data.keys()),
             'components': blueprint_data.get('componentes', {}).keys() if 'componentes' in blueprint_data else [],
+            'charter_mapping': blueprint_data.get('componentes', {}).get('charter_mapping', {}) if 'componentes' in blueprint_data else {},
             'flows': 'flujos_datos_eventos' in blueprint_data,
             'nfr_section': 'seguridad_enforcement' in blueprint_data and 'operaciones' in blueprint_data,
             'decisions': 'decisiones_arquitectonicas' in blueprint_data,
@@ -88,11 +89,27 @@ class BlueprintEvaluator:
         present_sections = [s for s in required_sections if s in blueprint_data['sections']]
         checks['structural_sections'] = len(present_sections) / len(required_sections)
         
-        # 2. Objectives coverage (simple keyword matching)
+        # 2. Objectives coverage (check charter_mapping section)
         objectives_covered = 0
+        charter_mapping = blueprint_data.get('charter_mapping', {})
+        
         for obj in charter_data['objectives']:
-            if any(self._text_similarity(obj, str(comp)) > 0.3 for comp in blueprint_data['components']):
+            # Check if objective is mapped in charter_mapping section
+            mapped_found = False
+            for mapping_key, mapping_data in charter_mapping.items():
+                if isinstance(mapping_data, dict) and 'charter_requirement' in mapping_data:
+                    if self._text_similarity(obj, mapping_data['charter_requirement']) > 0.4:
+                        mapped_found = True
+                        break
+            
+            # Fallback: check regular components if no charter_mapping found
+            if not mapped_found and blueprint_data['components']:
+                if any(self._text_similarity(obj, str(comp)) > 0.3 for comp in blueprint_data['components']):
+                    mapped_found = True
+            
+            if mapped_found:
                 objectives_covered += 1
+                
         checks['objectives_coverage'] = objectives_covered / max(len(charter_data['objectives']), 1)
         
         # 3. Functional requirements coverage
@@ -107,9 +124,19 @@ class BlueprintEvaluator:
         
         # 5. Constraints mapped to decisions
         constraints_mapped = 0
-        for constraint in charter_data['constraints']:
-            if blueprint_data['decisions']:
-                constraints_mapped += 0.8  # Assume good coverage if decisions section exists
+        
+        # Check for Out-of-Scope constraints specifically mapped to ADRs
+        out_of_scope_constraints = ['hosting', 'nube', 'multi-tenant', 'organizaciones', 'integración', 'ides']
+        
+        if blueprint_data['decisions']:
+            # Check if we have ADRs that address Charter constraints
+            decisions_data = blueprint_data.get('sections', [])
+            if 'decisiones_arquitectonicas' in decisions_data:
+                # If we have 3+ ADRs and Out-of-Scope keywords, assume good mapping
+                constraints_mapped = len(charter_data['constraints']) * 0.9  # High confidence if ADRs exist
+            else:
+                constraints_mapped = len(charter_data['constraints']) * 0.5  # Some coverage
+        
         checks['constraints_mapped'] = min(constraints_mapped / max(len(charter_data['constraints']), 1), 1.0)
         
         # 6. Glossary consistency

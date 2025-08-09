@@ -10,3 +10,10 @@ id,author,timestamp,description,status
 9,BluePrintAgent,2025-08-05T21:45:00Z,Template blueprint.md migrado a estructura atemporal con placeholders v2.0 - enfoque en arquitectura y componentes técnicos,merged
 10,BluePrintAgent,2025-08-05T21:47:00Z,Eliminada sección User Stories del template blueprint - mantener 100% atemporal (US van en backlog),merged
 11,BluePrintAgent,2025-08-05T21:52:00Z,Template backlog_fN.yaml actualizado con placeholders E1-E5 B1 B5-B7 X4 X7 - estructura DevAgent-ready,merged
+12,BluePrintAgent,2025-08-09T11:30:00Z,Añadida sección charter_mapping para mapear objetivos del Charter a componentes técnicos específicos,merged
+13,BluePrintAgent,2025-08-09T11:35:00Z,Creada ADR-001: Arquitectura Local Filesystem-Based - cumple restricción Out-of-Scope hosting en nube,merged
+14,BluePrintAgent,2025-08-09T11:37:00Z,Creada ADR-002: Single-Tenant por Proyecto - cumple restricción Out-of-Scope multi-tenant entre organizaciones,merged  
+15,BluePrintAgent,2025-08-09T11:39:00Z,Creada ADR-003: CLI/Web como Interfaces Principales - cumple restricción Out-of-Scope integración profunda IDEs,merged
+16,BluePrintAgent,2025-08-09T11:42:00Z,Documentado flujo completo nueva feature de 7 pasos en 3_flujos_datos_eventos/flujo_nueva_feature.md,merged
+17,BluePrintAgent,2025-08-09T11:45:00Z,Especificados contratos comunicación entre agentes en 3_flujos_datos_eventos/contratos_agentes.md,merged
+18,BluePrintAgent,2025-08-09T11:48:00Z,Sincronizado blueprint.yaml v2.1→v2.2 integrando charter_mapping + 3 ADRs + flujos documentados,merged
