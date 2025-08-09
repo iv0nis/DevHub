@@ -1,0 +1,360 @@
+---
+# DevHub TechSpecs Template v2.0 (Hybrid: Industry LLD + PMS/DAS Integration)
+meta:
+  id: "TS-{MODULE_ID}"
+  name: "{MODULE_NAME}"
+  owner: "{OWNER}"
+  status: "draft"  # draft|review|approved|deprecated
+  version: "1.0"
+  dates:
+    created: "{CREATED_DATE}"
+    last_modified: "{LAST_MODIFIED_DATE}"
+  references:
+    blueprint_us: ["{US_ID_1}", "{US_ID_2}"]  # trazabilidad HLD
+    adr: ["{ADR_ID}"]  # decisiones clave
+    requirements: ["{REQ_ID_1}", "{REQ_ID_2}"]
+    related_specs: []
+  sync:
+    source_dir: "docs/03_TechSpecs/{MODULE_NAME}/"
+    consolidated: "docs/TechSpecs.yaml"
+    sha1_hash: "{SHA1_HASH}"
+project_name: "{PROJECT_NAME}"
+blueprint_reference: "{BLUEPRINT_VERSION}"
+---
+
+# TechSpecs - {MODULE_NAME}
+
+## 1. Introducción
+
+### Propósito
+{PURPOSE_DESCRIPTION}
+
+### Alcance
+{SCOPE_DESCRIPTION}
+
+### Referencias
+- **Blueprint**: {BLUEPRINT_REFERENCE}
+- **Charter**: {CHARTER_REFERENCE}
+- **HLD Components**: {HLD_COMPONENTS}
+- **User Stories**: {US_REFERENCES}
+- **ADRs**: {ADR_REFERENCES}
+
+### Contexto
+- **Propósito**: {qué resuelve esta feature a nivel técnico}
+- **Alcance incluido**: [{SCOPE_IN_1}, {SCOPE_IN_2}]
+- **Alcance excluido**: [{SCOPE_OUT_1}, {SCOPE_OUT_2}]
+- **Suposiciones**: [{ASSUMPTION_1}, {ASSUMPTION_2}]
+- **Restricciones**:
+  - **Técnicas**: [{TECH_CONSTRAINTS}]
+  - **Regulatorias**: [{REGULATORY_CONSTRAINTS}]
+  - **Temporales**: [{TIME_CONSTRAINTS}]
+
+## 2. Descripción del Módulo
+
+### Información General
+- **Nombre**: {MODULE_NAME}
+- **Responsabilidades**: {MODULE_RESPONSIBILITIES}
+- **Relación con otros módulos**: {MODULE_RELATIONSHIPS}
+
+### Diagramas
+- **Clases**: {CLASS_DIAGRAM_PATH}
+- **Secuencia**: {SEQUENCE_DIAGRAM_PATH}
+
+## 3. Diseño Detallado
+
+### Clases y Objetos
+{COMPONENT_1_NAME}:
+  attributes:
+    - {ATTRIBUTE_1}: {TYPE_1}
+    - {ATTRIBUTE_2}: {TYPE_2}
+  methods:
+    - {METHOD_1}:
+        purpose: {METHOD_1_PURPOSE}
+        inputs: {METHOD_1_INPUTS}
+        outputs: {METHOD_1_OUTPUTS}
+    - {METHOD_2}:
+        purpose: {METHOD_2_PURPOSE}
+        inputs: {METHOD_2_INPUTS}
+        outputs: {METHOD_2_OUTPUTS}
+  responsibilities:
+    - {RESPONSIBILITY_1}
+    - {RESPONSIBILITY_2}
+
+### Interfaces y Contratos
+{INTERFACE_1}:
+  type: {INTERFACE_TYPE}
+  inputs: {INTERFACE_INPUTS}
+  outputs: {INTERFACE_OUTPUTS}
+  protocol: {COMMUNICATION_PROTOCOL}
+  authentication: {AUTH_METHOD}
+
+### Algoritmos y Pseudocódigo
+{ALGORITHM_1}:
+  description: {ALGORITHM_DESCRIPTION}
+  steps:
+    - step: 1
+      action: {STEP_1_ACTION}
+    - step: 2
+      action: {STEP_2_ACTION}
+    - step: 3
+      action: {STEP_3_ACTION}
+  complexity: {TIME_COMPLEXITY}
+
+### Flujos Internos
+{INTERNAL_FLOW_1}:
+  trigger: {FLOW_TRIGGER}
+  steps:
+    - {FLOW_STEP_1}
+    - {FLOW_STEP_2}
+    - {FLOW_STEP_3}
+  output: {FLOW_OUTPUT}
+
+### Validaciones y Reglas de Negocio
+rules:
+  - rule_id: {RULE_ID_1}
+    description: {RULE_DESCRIPTION_1}
+    validation: {VALIDATION_LOGIC_1}
+  - rule_id: {RULE_ID_2}
+    description: {RULE_DESCRIPTION_2}
+    validation: {VALIDATION_LOGIC_2}
+
+## 4. Datos
+
+### Esquema de Base de Datos
+tables:
+  {TABLE_1}:
+    columns:
+      - name: {COLUMN_1}
+        type: {DATA_TYPE_1}
+        constraints: {CONSTRAINTS_1}
+      - name: {COLUMN_2}
+        type: {DATA_TYPE_2}
+        constraints: {CONSTRAINTS_2}
+    relationships:
+      - {RELATIONSHIP_1}
+      - {RELATIONSHIP_2}
+
+### Modelos de Datos Internos
+{DATA_MODEL_1}:
+  structure: {MODEL_STRUCTURE}
+  lifecycle: {MODEL_LIFECYCLE}
+  validation: {MODEL_VALIDATION}
+
+### Formatos de Intercambio
+{DATA_FORMAT_1}:
+  type: {FORMAT_TYPE}
+  schema: {FORMAT_SCHEMA}
+  example: {FORMAT_EXAMPLE}
+
+## 5. Integraciones
+
+### APIs y Servicios
+{EXTERNAL_SERVICE_1}:
+  type: {SERVICE_TYPE}
+  endpoints:
+    - endpoint: {ENDPOINT_1}
+      method: {HTTP_METHOD}
+      purpose: {ENDPOINT_PURPOSE}
+      authentication: {ENDPOINT_AUTH}
+  format: {DATA_FORMAT}
+
+### Dependencias Externas
+libraries:
+  - name: {LIBRARY_1}
+    version: {LIBRARY_VERSION_1}
+    purpose: {LIBRARY_PURPOSE_1}
+  - name: {LIBRARY_2}
+    version: {LIBRARY_VERSION_2}
+    purpose: {LIBRARY_PURPOSE_2}
+
+## 6. Seguridad
+
+### Controles de Acceso
+access_controls:
+  - level: {ACCESS_LEVEL_1}
+    permissions: {PERMISSIONS_1}
+    enforcement: {ENFORCEMENT_METHOD_1}
+
+### Validación de Entradas
+input_validation:
+  - input_type: {INPUT_TYPE_1}
+    validation_rules: {VALIDATION_RULES_1}
+    sanitization: {SANITIZATION_METHOD_1}
+
+### Encriptación y Hash
+security_measures:
+  - data_type: {SENSITIVE_DATA_1}
+    protection: {PROTECTION_METHOD_1}
+    algorithm: {ENCRYPTION_ALGORITHM_1}
+
+## 7. Errores y Manejo de Excepciones
+
+### Tipos de Errores
+error_types:
+  - error_code: {ERROR_CODE_1}
+    description: {ERROR_DESCRIPTION_1}
+    category: {ERROR_CATEGORY_1}
+    recovery_strategy: {RECOVERY_STRATEGY_1}
+
+### Logging y Alertas
+logging:
+  - level: {LOG_LEVEL_1}
+    events: {LOG_EVENTS_1}
+    format: {LOG_FORMAT_1}
+  
+alerts:
+  - condition: {ALERT_CONDITION_1}
+    severity: {ALERT_SEVERITY_1}
+    notification: {NOTIFICATION_METHOD_1}
+
+## 8. Pruebas Previstas
+
+### Casos de Prueba Unitarios
+unit_tests:
+  - test_case: {TEST_CASE_1}
+    description: {TEST_DESCRIPTION_1}
+    inputs: {TEST_INPUTS_1}
+    expected_output: {EXPECTED_OUTPUT_1}
+    assertions: {TEST_ASSERTIONS_1}
+
+### Datos de Prueba
+test_data:
+  - dataset: {DATASET_1}
+    purpose: {DATASET_PURPOSE_1}
+    size: {DATASET_SIZE_1}
+
+### Mocks y Stubs
+mocks:
+  - component: {MOCK_COMPONENT_1}
+    purpose: {MOCK_PURPOSE_1}
+    behavior: {MOCK_BEHAVIOR_1}
+
+## 9. Rendimiento
+
+### Límites de Carga
+performance_limits:
+  - metric: {PERFORMANCE_METRIC_1}
+    limit: {PERFORMANCE_LIMIT_1}
+    measurement: {MEASUREMENT_METHOD_1}
+
+### Optimizaciones
+optimizations:
+  - technique: {OPTIMIZATION_1}
+    target: {OPTIMIZATION_TARGET_1}
+    expected_improvement: {EXPECTED_IMPROVEMENT_1}
+
+### Métricas de Aceptación
+acceptance_criteria:
+  - metric: {ACCEPTANCE_METRIC_1}
+    threshold: {ACCEPTANCE_THRESHOLD_1}
+    measurement_period: {MEASUREMENT_PERIOD_1}
+
+## 10. Anexos
+
+### Diagramas de Soporte
+diagrams:
+  - type: {DIAGRAM_TYPE_1}
+    file: {DIAGRAM_FILE_1}
+    description: {DIAGRAM_DESCRIPTION_1}
+
+### Ejemplos de Datos
+data_examples:
+  - scenario: {EXAMPLE_SCENARIO_1}
+    data: {EXAMPLE_DATA_1}
+
+### ADRs Relacionados
+adrs:
+  - adr_id: {ADR_ID_1}
+    title: {ADR_TITLE_1}
+    decision: {ADR_DECISION_1}
+    impact: {ADR_IMPACT_1}
+
+### Trazabilidad
+traceability:
+  blueprint_components:
+    - {BLUEPRINT_COMPONENT_1}
+    - {BLUEPRINT_COMPONENT_2}
+  backlog_tasks:
+    - {BACKLOG_TASK_ID_1}
+    - {BACKLOG_TASK_ID_2}
+  requirements:
+    - {REQUIREMENT_ID_1}
+    - {REQUIREMENT_ID_2}
+
+## 11. Integración PMS/DAS
+
+### PMS Integration
+pms_integration:
+  memory_index_paths:
+    status: "./memory/project_status.md"
+    blueprint: "./docs/blueprint.yaml"
+    blueprint_changes: "./docs/blueprint_changes.csv"
+    backlog_dir: "./docs/05_backlog/"
+    techspecs: "./docs/TechSpecs.yaml"
+  sha_validation:
+    enabled: true
+    expected_hash: "{EXPECTED_BLUEPRINT_SHA1}"
+  save_modes:
+    default: "update_single"
+    critical_resources:
+      - scope: "blueprint"
+        mode: "update_dual"
+      - scope: "techspecs"
+        mode: "update_single"
+  concurrency:
+    locks: true
+    tmp_write_pattern: true  # write .tmp + atomic rename
+  metrics:
+    enabled: true
+    expose: ["burndown", "health", "velocity"]
+
+### DAS Enforcement
+das_enforcement:
+  enabled: true
+  agents:
+    - id: "blueprint_agent"
+      pms_scopes:
+        read: ["blueprint", "blueprint_changes", "project_charter", "roadmap"]
+        write: ["blueprint", "project_status"]
+      mode: "update_dual"
+    - id: "dev_agent"
+      pms_scopes:
+        read: ["backlog_f*", "blueprint", "project_status", "techspecs"]
+        write: ["backlog_f*", "project_status", "blueprint_changes"]
+      mode: "update_single"
+    - id: "qa_agent"
+      pms_scopes:
+        read: ["backlog_f*", "blueprint", "techspecs"]
+        write: ["backlog_f*", "project_status", "blueprint_changes"]
+      mode: "update_single"
+  rules:
+    - id: "no_direct_fs_access"
+      description: "Los agentes nunca acceden a archivos directamente; usar DAS Enforcer → PMS-Core."
+    - id: "blueprint_change_flow"
+      description: "Cambios al blueprint via blueprint_changes.csv (proposed→reviewed→approved→merged)."
+
+### Blueprint Contract
+blueprint_contract:
+  format:
+    phase: "Fase {N}"
+    epic: "{N}.{X}"
+    user_story: "US-{N}.{X}.{Y}"
+  merge_flow_states: ["proposed", "reviewed", "approved", "merged"]
+  sync_dependencies:
+    blueprint_to_techspecs: "automated"
+    techspecs_to_backlog: "automated"
+    validation_required: "sha1_integrity"
+
+## 12. Changelog y Versionado
+
+changelog:
+  - "v1.0.0: creación inicial"
+  - "v1.1.0: {CHANGE_DESCRIPTION}"
+
+open_questions:
+  - "{PREGUNTA_PENDIENTE_1}"
+  - "{PREGUNTA_PENDIENTE_2}"
+
+acceptance_criteria:
+  - "{RESULTADO_OBSERVABLE_1}"
+  - "{RESULTADO_OBSERVABLE_2}"
