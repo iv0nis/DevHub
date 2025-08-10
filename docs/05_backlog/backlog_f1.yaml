@@ -1,10 +1,286 @@
+# Backlog Fase 1 · Sprint 1-3
+# DevHub v1.0 - Implementación Core Components
 fase: 1
 sprint: 1
 historias:
-  US-1.1.1:
-    estado: P
-    tareas:
-      - id: T-1.1.1a
-        desc: "Test task"
-        estado: C
-        criticidad: medium
+  TS-PMS-001:
+    # Esenciales (E1-E5)
+    id: "TS-PMS-001"
+    title: "Implementar PMS Core - Sistema de memoria persistente"
+    phase: "F1"
+    status: "todo"
+    priority: "P0"
+    
+    # Básicos (B1, B5-B7)
+    description: "Desarrollar sistema de memoria persistente con validación SHA-1, transacciones atómicas y rollback. Componente crítico para integridad de datos."
+    dependencies: []
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "TechSpec completado. Listo para implementación."
+      manual_comments: "Incluye PMSCore, IntegrityValidator, TransactionManager"
+      last_failure_reason: ""
+
+  TS-PMS-002:
+    # Esenciales (E1-E5)
+    id: "TS-PMS-002"
+    title: "Implementar memory_index.yaml y schemas de validación"
+    phase: "F1"
+    status: "todo"
+    priority: "P0"
+    
+    # Básicos (B1, B5-B7)
+    description: "Crear sistema de mapeo de scopes a paths filesystem y schemas de validación YAML para blueprint, project_status y backlog."
+    dependencies: ["TS-PMS-001"]
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Dependiente de PMS Core completado"
+      manual_comments: "Esquemas Pydantic para blueprint_v2, project_status_v1, backlog_v1"
+      last_failure_reason: ""
+
+  TS-DAS-001:
+    # Esenciales (E1-E5)
+    id: "TS-DAS-001"
+    title: "Implementar DAS Enforcer - Sistema de orquestación de agentes"
+    phase: "F1"
+    status: "todo" 
+    priority: "P0"
+    
+    # Básicos (B1, B5-B7)
+    description: "Desarrollar sistema de enforcement con validación automática de permisos, filesystem protection y audit logging completo."
+    dependencies: ["TS-PMS-001"]
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Requiere PMS Core operativo para persistence layer"
+      manual_comments: "DASEnforcer, PermissionValidator, FilesystemProtector, AuditLogger"
+      last_failure_reason: ""
+
+  TS-DAS-002:
+    # Esenciales (E1-E5)
+    id: "TS-DAS-002"
+    title: "Configurar agent templates y permission system"
+    phase: "F1"
+    status: "todo"
+    priority: "P1"
+    
+    # Básicos (B1, B5-B7)
+    description: "Implementar carga de configuraciones YAML de agentes y sistema granular de permisos por scope con soporte wildcards."
+    dependencies: ["TS-DAS-001"]
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Agent configs ya existen, necesita integración con enforcer"
+      manual_comments: "BlueprintAgent, DevAgent, QAAgent, AiProjectManager configs"
+      last_failure_reason: ""
+
+  TS-CLI-001:
+    # Esenciales (E1-E5)
+    id: "TS-CLI-001"
+    title: "Implementar CLI DevHub - Comandos básicos"
+    phase: "F1"
+    status: "todo"
+    priority: "P1"
+    
+    # Básicos (B1, B5-B7)
+    description: "Desarrollar command-line interface con comandos create-project, validate-structure, sync-documents, evaluate-blueprint usando Click framework."
+    dependencies: ["TS-DAS-002", "TS-PMS-002"]
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Framework CLI esqueleto existe en devhub_cli.py"
+      manual_comments: "Expandir con ProjectCreator, StructureValidator, DocumentSyncer"
+      last_failure_reason: ""
+
+  TS-CLI-002:
+    # Esenciales (E1-E5)
+    id: "TS-CLI-002"
+    title: "Implementar sistema de templates y project creation"
+    phase: "F1"
+    status: "todo"
+    priority: "P2"
+    
+    # Básicos (B1, B5-B7)
+    description: "Crear sistema de templates Jinja2 para generación automática de proyectos DevHub con estructura estándar."
+    dependencies: ["TS-CLI-001"]
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Templates base ya existen en docs/doc_templates/"
+      manual_comments: "Template engine, directory creation, Git initialization"
+      last_failure_reason: ""
+
+  TS-CLI-003:
+    # Esenciales (E1-E5)
+    id: "TS-CLI-003"
+    title: "Implementar agent-run command y execution system"
+    phase: "F1"
+    status: "todo"
+    priority: "P2"
+    
+    # Básicos (B1, B5-B7)
+    description: "Desarrollar comando para ejecutar tareas específicas con agentes, incluyendo AgentRunner, timeout management y reporting."
+    dependencies: ["TS-DAS-002"]
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Integración CLI con DAS enforcer"
+      manual_comments: "ExecutionResult, task mapping, timeout context"
+      last_failure_reason: ""
+
+  TS-WEB-001:
+    # Esenciales (E1-E5)
+    id: "TS-WEB-001"
+    title: "Setup Web Dashboard MVP - Next.js base project"
+    phase: "F1"
+    status: "todo"
+    priority: "P2"
+    
+    # Básicos (B1, B5-B7)
+    description: "Crear proyecto Next.js base con TypeScript, Tailwind CSS, React Query y estructura de directorios según TechSpec."
+    dependencies: []
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Proyecto web independiente de core Python"
+      manual_comments: "package.json, next.config.js, tailwind.config.js setup"
+      last_failure_reason: ""
+
+  TS-WEB-002:
+    # Esenciales (E1-E5)
+    id: "TS-WEB-002"
+    title: "Implementar API routes para Project Status y Blueprint"
+    phase: "F1"
+    status: "todo"
+    priority: "P2"
+    
+    # Básicos (B1, B5-B7)
+    description: "Desarrollar API routes /api/project/status y /api/blueprint/completeness con integración Python via PythonShell."
+    dependencies: ["TS-WEB-001", "TS-PMS-001"]
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Requiere PMS operativo para data access"
+      manual_comments: "NextApiRequest/Response handlers, error handling"
+      last_failure_reason: ""
+
+  TS-WEB-003:
+    # Esenciales (E1-E5)
+    id: "TS-WEB-003"
+    title: "Implementar componentes Dashboard principales"
+    phase: "F1"
+    status: "todo"
+    priority: "P3"
+    
+    # Básicos (B1, B5-B7)
+    description: "Desarrollar ProjectOverview, BlueprintStatus, AgentActivity y DocumentSync components con Recharts para visualizaciones."
+    dependencies: ["TS-WEB-002"]
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "UI components con data from API routes"
+      manual_comments: "React components, TypeScript interfaces, responsive design"
+      last_failure_reason: ""
+
+  TS-ARCH-001:
+    # Esenciales (E1-E5)
+    id: "TS-ARCH-001"
+    title: "Implementar Event System y Observer Pattern"
+    phase: "F1"
+    status: "todo"
+    priority: "P1"
+    
+    # Básicos (B1, B5-B7)
+    description: "Desarrollar EventPublisher, SystemEvent classes y event-driven communication entre componentes según arquitectura especificada."
+    dependencies: ["TS-DAS-001"]
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Observer pattern para desacoplamiento componentes"
+      manual_comments: "EventTypes, subscribers, async event processing"
+      last_failure_reason: ""
+
+  TS-TEST-001:
+    # Esenciales (E1-E5)
+    id: "TS-TEST-001"
+    title: "Implementar test suite básico para PMS y DAS"
+    phase: "F1"
+    status: "todo"
+    priority: "P2"
+    
+    # Básicos (B1, B5-B7)
+    description: "Crear unit tests y integration tests para PMS Core y DAS Enforcer con coverage mínimo 90% en componentes críticos."
+    dependencies: ["TS-PMS-002", "TS-DAS-002"]
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Testing strategy definida en TechSpecs"
+      manual_comments: "pytest framework, fixtures, mocking, test data sets"
+      last_failure_reason: ""
+
+  TS-CONFIG-001:
+    # Esenciales (E1-E5)
+    id: "TS-CONFIG-001"
+    title: "Implementar Configuration Management System"
+    phase: "F1"
+    status: "todo"
+    priority: "P3"
+    
+    # Básicos (B1, B5-B7)
+    description: "Desarrollar ConfigManager con soporte multi-environment (development, production, testing) según arquitectura especificada."
+    dependencies: ["TS-ARCH-001"]
+    created_at: "2025-08-09T12:00:00Z"
+    updated_at: "2025-08-09T12:00:00Z"
+    
+    # Extendidos (X4, X7)  
+    blocked_by: ""
+    notes:
+      devagent_observations: "Environment-specific configs para deployment"
+      manual_comments: "EnvironmentConfig dataclass, settings per environment"
+      last_failure_reason: ""
+
+# Métricas Fase 1:
+# Total tasks: 13
+# P0 (Critical): 3 tasks
+# P1 (High): 3 tasks  
+# P2 (Medium): 5 tasks
+# P3 (Low): 2 tasks
+# Estimated sprints: 3 (4-5 tasks per sprint)
+# Dependencies: Longest path TS-PMS-001 -> TS-DAS-001 -> TS-CLI-001 -> TS-CLI-002
