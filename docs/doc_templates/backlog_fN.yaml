@@ -1,14 +1,96 @@
-- id: TASK-001
-  titulo: "Añadir capacidad de crear backlogs en DevAgent"
-  descripcion: "Implementar función para generar ítems de backlog a partir de especificaciones dadas."
-  estado: P
-  prioridad: "{{ Alta | Media | Baja }}"
-  valor_negocio: "{{ Beneficio o impacto esperado }}"
-  archivos_involucrados:
-    - "{{ ruta/archivo_1 }}"
-    - "{{ ruta/archivo_2 }}"
-  criterios_aceptacion:
-    - "{{ Condición 1 de 'hecho' }}"
-    - "{{ Condición 2 de 'hecho' }}"
-  referencia_blueprint: "{{ US-1.2.3 }}"
-  referencia_techspec: "{{ TS-0001 }}"
+# Backlog Fase {PHASE_NUMBER} · Sprint {SPRINT_NUMBER}
+# Template optimizado para DevAgent autónomo + supervisión humana
+
+fase: {PHASE_NUMBER}
+sprint: {SPRINT_NUMBER}
+
+historias:
+  {TASK_ID}:
+    # === INFORMACIÓN BÁSICA ===
+    id: "{TASK_ID}"                         # Identificador único (ej: DEVHUB-001)
+    title: "{TASK_TITLE}"                   # Título descriptivo y conciso
+    description: "{DESCRIPTION}"            # QUÉ hacer y PARA QUÉ (historia de usuario preferida)
+    
+    # === INFORMACIÓN TÉCNICA PARA DEVAGENT ===
+    archivos_involucrados: [{FILES_LIST}]  # Archivos específicos a crear/modificar
+    estado: "{STATUS}"                      # todo/in-progress/done/blocked  
+    prioridad: "{PRIORITY}"                 # P0 (crítico), P1 (alto), P2 (medio), P3 (bajo)
+    
+    # === VALOR ESTRATÉGICO PARA HUMANOS ===
+    valor_estrategico: "{BUSINESS_VALUE}"   # Por qué es importante, qué impacto tiene
+    sprint_fase: "{SPRINT_PHASE}"           # Sprint X (Proyecto Y) - épica Z
+    
+    # === CRITERIOS DE ACEPTACIÓN ===
+    criterios_aceptacion:
+      - "Dado {CONDITION}, cuando {ACTION}, entonces {RESULT}"
+      - "Dado {CONDITION_2}, cuando {ACTION_2}, entonces {RESULT_2}"
+      - "{VALIDATION_CHECK}"                # Comando verificable: run_tests('test_file')
+    
+    # === REFERENCIAS Y TRAZABILIDAD ===
+    referencias: "{TECH_REFERENCES}"        # Ver Blueprint secc. X, TechSpec Y, ADR Z
+    
+    # === CONTROL DE FLUJO ===
+    dependencias: [{DEPENDENCIES}]          # IDs de tareas que deben completarse antes
+    bloqueado_por: "{BLOCKING_REASON}"      # Solo si status = "blocked"
+    aprobacion: "{APPROVAL_NEEDED}"         # ej: "Requiere code review del arquitecto"
+    
+    # === METADATOS ===
+    created_at: "{CREATED_AT}"              # ISO-8601
+    updated_at: "{UPDATED_AT}"              # ISO-8601
+    
+    # === OBSERVACIONES ===
+    notas:
+      devagent_observations: "{AI_NOTES}"   # Observaciones técnicas de DevAgent
+      manual_comments: "{HUMAN_COMMENTS}"   # Comentarios del equipo
+      last_failure_reason: "{FAILURE_REASON}" # Si falló anteriormente
+
+# === EJEMPLO REAL BASADO EN LA INVESTIGACIÓN ===
+  DEVHUB-001:
+    id: "DEVHUB-001"
+    title: "Añadir capacidad Blueprint→TechSpecs en DevAgent"
+    description: "Implementar en DevAgent funcionalidad para generar TechSpecs a partir de componentes blueprint. Debe permitir identificar gaps y producir especificaciones técnicas formateadas automáticamente."
+    
+    archivos_involucrados: ["das/das.md", "agents/DevAgent.yaml", "das/agent_templates/DevAgent.yaml"]
+    estado: "todo"
+    prioridad: "P0"
+    
+    valor_estrategico: "Alto. Resuelve gap crítico del workflow paso 4, automatizando traducción Blueprint→TechSpecs y mejorando velocidad de desarrollo."
+    sprint_fase: "Sprint Consolidación F0 (DevHub) – épica Resolución Gaps Arquitectónicos"
+    
+    criterios_aceptacion:
+      - "Dado un blueprint actualizado, cuando DevAgent ejecuta análisis, entonces identifica componentes sin TechSpecs automáticamente"
+      - "Dado componentes identificados, cuando DevAgent genera TechSpecs, entonces usa template docs/doc_templates/techspecs.yaml correctamente"  
+      - "validate_techspecs_generation('docs/03_TechSpecs/')"
+    
+    referencias: "Ver docs/DevAgent_BP_to_TS_Expansion.md para contexto, Blueprint workflow paso 4"
+    
+    dependencias: []
+    bloqueado_por: ""
+    aprobacion: "Requiere validación BlueprintAgent como custodio arquitectónico"
+    
+    created_at: "2025-08-10T00:00:00Z"
+    updated_at: "2025-08-10T00:00:00Z"
+    
+    notas:
+      devagent_observations: "Gap crítico identificado en workflow paso 4"
+      manual_comments: "Información técnica disponible en DevAgent_BP_to_TS_Expansion.md"
+      last_failure_reason: ""
+
+# === GUÍA DE USO ===
+#
+# CAMPOS OBLIGATORIOS:
+# - id, title, description, estado, prioridad, criterios_aceptacion
+#
+# PARA DEVAGENT AUTÓNOMO:
+# - archivos_involucrados: Lista exacta de archivos a modificar
+# - criterios_aceptacion: Incluir commands verificables (ej: run_tests, validate_*)
+# - referencias: Documentación técnica específica
+#
+# PARA HUMANOS:
+# - valor_estrategico: Por qué importa esta tarea
+# - sprint_fase: Contexto de planificación
+# - aprobacion: Controles de gobernanza si necesarios
+#
+# VALORES PERMITIDOS:
+# - estado: todo, in-progress, done, blocked
+# - prioridad: P0 (crítico), P1 (alto), P2 (medio), P3 (bajo)
