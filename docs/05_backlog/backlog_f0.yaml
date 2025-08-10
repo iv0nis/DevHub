@@ -1,0 +1,167 @@
+# Backlog Fase 0 · Consolidación Documental P1
+# DevHub - Integración de archivos sueltos a secciones canónicas
+fase: 0
+sprint: "consolidacion"
+proposito: "Eliminar fragmentación documental integrando información crítica a secciones canónicas"
+
+historias:
+  P1-DEVAGENT-001:
+    # Esenciales (E1-E5)
+    id: "P1-DEVAGENT-001"
+    title: "Añadir capacidad Blueprint→TechSpecs en DevAgent (responsabilidades + capabilities)"
+    phase: "F0"
+    status: "done"
+    priority: "P0"
+    
+    # Básicos (B1, B5-B7)
+    description: "Añadir capacidades específicas Blueprint→TechSpecs en DevAgent: análisis automático de gaps, generación de TechSpecs modulares usando template, y implementación completa workflow paso 4."
+    dependencies: []
+    created_at: "2025-08-10T00:00:00Z"
+    updated_at: "2025-08-10T12:30:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Gap crítico: workflow paso 4 sin responsable definido"
+      manual_comments: "✅ COMPLETADO: das/das.md sección 2.2 actualizada con responsabilidades + save_scopes. agents/DevAgent.yaml actualizado con capabilities técnicas completas."
+      last_failure_reason: ""
+    
+    # Detalles técnicos específicos - QUÉ expandir exactamente
+    cambios_requeridos:
+      das_das_md:
+        seccion: "2.2 DevAgent"
+        responsabilidades_agregar:
+          - "Traduce componentes del blueprint a especificaciones técnicas detalladas"
+          - "Genera TechSpecs modulares en docs/03_TechSpecs/"
+          - "Identifica gaps entre blueprint y TechSpecs existentes"
+        integration_actualizar:
+          save_scopes: "agregar 'techspecs' al array existente"
+      
+      agents_devagent_yaml:
+        archivo: "agents/DevAgent.yaml"
+        cambios_implementados:
+          responsibilities_added:
+            - "Traducir componentes del blueprint a especificaciones técnicas detalladas"
+            - "Generar TechSpecs modulares en docs/03_TechSpecs/"
+            - "Identificar gaps entre blueprint y TechSpecs existentes"
+          
+          step_4_enhanced:
+            - "Cargar blueprint y analizar TechSpecs (análisis automático de gaps)"
+            - "identify_missing_techspecs(blueprint, existing_techspecs)"
+            - "Archivo actualizado: docs/blueprint.yaml"
+          
+          step_8_added:
+            - "Generar TechSpecs si requerido"
+            - "generate_techspec_from_blueprint(component, blueprint)"
+            - "template_base: docs/doc_templates/techspecs.yaml"
+            - "validate_techspecs_generation('docs/03_TechSpecs/')"
+            
+        pms_scopes_actualizados:
+          read: "agregado 'techspecs'"
+          write: "agregado 'techspecs'"
+          file_scopes: "techspecs: 'docs/03_TechSpecs/**/*.md'"
+      
+    # Información rescatada de DevAgent_BP_to_TS_Expansion.md
+    justificacion_devagent:
+      - "Responsabilidades actuales: Ejecuta tareas de desarrollo siguiendo blueprint y backlog"
+      - "Capacidad técnica: Ya lee blueprint para contexto" 
+      - "Conocimiento dominio: Entiende requerimientos técnicos para implementación"
+      - "Workflow natural: Blueprint → TechSpecs → Implementación es progresión lógica"
+    
+    contexto_gap:
+      problema: "Workflow de 7 pasos define paso 4 generación TechSpecs pero no especifica agente responsable"
+      situacion_actual: "Blueprint paso 4: TechSpec (módulo) → ADR si hay decisión clave"
+      prerequisito: "Blueprint ≥ 80% + feature especificada" 
+      output_esperado: "docs/03_TechSpecs/ (estructura ya existe)"
+
+  P1-DEVAGENT-002:
+    # Esenciales (E1-E5)
+    id: "P1-DEVAGENT-002"
+    title: "Sincronizar template das/agent_templates/DevAgent.yaml"
+    phase: "F0"
+    status: "todo"
+    priority: "P1"
+    
+    # Básicos (B1, B5-B7)
+    description: "Sincronizar cambios de agents/DevAgent.yaml al template das/agent_templates/DevAgent.yaml para mantener consistencia"
+    dependencies: ["P1-DEVAGENT-001"]
+    created_at: "2025-08-10T00:00:00Z"
+    updated_at: "2025-08-10T00:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Template debe mantener consistencia con agents/ working copy"
+      manual_comments: "Sincronización crítica: agents/ es working copy, das/agent_templates/ es template"
+      last_failure_reason: ""
+    
+    # Operación de sincronización
+    sincronizacion_requerida:
+      origen: "agents/DevAgent.yaml"
+      destino: "das/agent_templates/DevAgent.yaml"
+      metodo: "Copia completa manteniendo ambos archivos"
+      validacion: "Verificar que ambos archivos son idénticos post-sincronización"
+
+  P1-CLEANUP-003:
+    # Esenciales (E1-E5)
+    id: "P1-CLEANUP-003"
+    title: "Eliminar archivo redundante DevAgent_BP_to_TS_Expansion.md"
+    phase: "F0"
+    status: "todo"
+    priority: "P2"
+    
+    # Básicos (B1, B5-B7)
+    description: "Eliminar docs/DevAgent_BP_to_TS_Expansion.md tras integración exitosa a secciones canónicas"
+    dependencies: ["P1-DEVAGENT-001", "P1-DEVAGENT-002"]
+    created_at: "2025-08-10T00:00:00Z"
+    updated_at: "2025-08-10T00:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Solo eliminar tras validar integración completa"
+      manual_comments: "Eliminar redundancia según plan consolidación documental"
+      last_failure_reason: ""
+    
+    # Validaciones pre-eliminación
+    validaciones_requeridas:
+      - "das/das.md contiene todas las responsabilidades"
+      - "agents/DevAgent.yaml tiene todas las capabilities"
+      - "Template sincronizado correctamente"
+      - "No se pierde información única"
+
+  P1-VALIDACION-004:
+    # Esenciales (E1-E5)
+    id: "P1-VALIDACION-004"
+    title: "Validar completitud workflow Blueprint→TechSpecs"
+    phase: "F0"
+    status: "todo"
+    priority: "P1"
+    
+    # Básicos (B1, B5-B7)
+    description: "Verificar que gap crítico está resuelto: DevAgent puede ejecutar Blueprint→TechSpecs"
+    dependencies: ["P1-DEVAGENT-002"]
+    created_at: "2025-08-10T00:00:00Z"
+    updated_at: "2025-08-10T00:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Validación crítica para confirmar gap resuelto"
+      manual_comments: "Verificar que DevAgent tiene todo lo necesario para Blueprint→TechSpecs"
+      last_failure_reason: ""
+    
+    # Criterios de aceptación
+    criterios_validacion:
+      - "das/das.md especifica responsabilidad DevAgent para Blueprint→TechSpecs"
+      - "agents/DevAgent.yaml tiene capabilities técnicas necesarias"
+      - "DevAgent tiene permisos write para scope 'techspecs'"
+      - "Template docs/doc_templates/techspecs.yaml está referenciado"
+
+# Métricas Fase 0:
+# Total tasks: 4 (con template sync)
+# P0 (Critical): 1 task (integración canónica)
+# P1 (High): 2 tasks (template sync + validación)
+# P2 (Medium): 1 task (cleanup)
+# Objetivo: Resolver gap crítico workflow paso 4
+# Resultado: DevAgent formalmente responsable de Blueprint→TechSpecs

@@ -76,10 +76,13 @@ capabilities:
   - Ejecuta tareas de código, tests, builds
   - Actualiza estado de tareas (P → C/F)
   - Propone cambios al blueprint si encuentra impedimentos técnicos
+  - Traduce componentes del blueprint a especificaciones técnicas detalladas
+  - Genera TechSpecs modulares en docs/03_TechSpecs/
+  - Identifica gaps entre blueprint y TechSpecs existentes
 
 integration:
   load_scopes: ["backlog_f*", "blueprint", "project_status"]
-  save_scopes: ["backlog_f*", "project_status", "blueprint_changes"]
+  save_scopes: ["backlog_f*", "project_status", "blueprint_changes", "techspecs"]
   mode: "update_single"  # Actualizaciones de estado no críticas
 ```
 

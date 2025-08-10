@@ -8,6 +8,9 @@ agent_info:
     - "Seleccionar y ejecutar tareas del backlog"
     - "Registrar progreso y actualizar estado del proyecto"
     - "Mantener ciclo de desarrollo continuo"
+    - "Traducir componentes del blueprint a especificaciones técnicas detalladas"
+    - "Generar TechSpecs modulares en docs/03_TechSpecs/"
+    - "Identificar gaps entre blueprint y TechSpecs existentes"
 
 execution_flow:
   step_1:
@@ -36,12 +39,16 @@ execution_flow:
     note: "Opcional en PMS v1.2.1 - para contexto adicional"
     
   step_4:
-    name: "Cargar blueprint �nico"
-    description: "Lee la estructura estrat�gica del proyecto"
-    api_call: 'blueprint = pms_core.load(scope="blueprint")'
-    file: "docs/blueprint.md"
-    format: "Fase N � �pica N.X � US-N.X.Y"
-    purpose: "Contexto para entender qu� se est� construyendo"
+    name: "Cargar blueprint y analizar TechSpecs"
+    description: "Lee la estructura estrat�gica del proyecto y verifica completitud TechSpecs"
+    api_calls:
+      - 'blueprint = pms_core.load(scope="blueprint")'
+      - 'existing_techspecs = scan_directory("docs/03_TechSpecs/")'
+      - 'missing_components = identify_missing_techspecs(blueprint, existing_techspecs)'
+    file: "docs/blueprint.yaml"
+    format: "Componentes modulares con arquitectura definida"
+    purpose: "Contexto para desarrollo + identificar gaps Blueprint→TechSpecs"
+    automation: "Si hay missing_components, genera TechSpecs automáticamente"
     
   step_5:
     name: "Seleccionar siguiente tarea del backlog"
@@ -77,6 +84,19 @@ execution_flow:
         - '  pms_core.save(scope="blueprint_changes", payload=propuesta, mode="update_single")'
         
   step_8:
+    name: "Generar TechSpecs si requerido"
+    description: "Traduce componentes blueprint a especificaciones técnicas cuando es necesario"
+    condition: "if missing_components or blueprint_updated_recently()"
+    logic:
+      - 'for component in missing_components:'
+      - '  techspec_content = generate_techspec_from_blueprint(component, blueprint)'
+      - '  techspec_path = f"docs/03_TechSpecs/2_modulos/{component.lower()}.md"'
+      - '  pms_core.save(scope="techspecs", payload=techspec_content, mode="update_single")'
+    template_base: "docs/doc_templates/techspecs.yaml"
+    validation: 'validate_techspecs_generation("docs/03_TechSpecs/")'
+    note: "Implementa workflow paso 4: Blueprint→TechSpecs automático"
+    
+  step_9:
     name: "Continuar ciclo"
     description: "Vuelve al paso 5 para buscar siguiente tarea"
     action: 'return loop_siguiente_tarea()'
@@ -92,9 +112,10 @@ technical_specs:
   file_scopes:
     memory_index: "memory/memory_index.yaml"
     project_status: "memory/project_status.md"
-    blueprint: "docs/blueprint.md"
-    backlog: "docs/backlog/backlog_f{n}.yaml"
+    blueprint: "docs/blueprint.yaml"
+    backlog: "docs/05_backlog/backlog_f{n}.yaml"
     blueprint_changes: "docs/blueprint_changes.csv"
+    techspecs: "docs/03_TechSpecs/**/*.md"
     
   task_states:
     C: "Completada"
@@ -117,8 +138,8 @@ technical_specs:
         - "Observaciones"
 
 pms_scopes:
-  read: ["memory_index", "backlog_f*", "blueprint", "project_status"]
-  write: ["backlog_f*", "project_status", "blueprint_changes"]
+  read: ["memory_index", "backlog_f*", "blueprint", "project_status", "techspecs"]
+  write: ["backlog_f*", "project_status", "blueprint_changes", "techspecs"]
   mode: "update_single"
 
 enforcement:
