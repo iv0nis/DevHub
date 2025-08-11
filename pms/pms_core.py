@@ -43,8 +43,9 @@ except ImportError:
 PROJECT_ROOT = Path(os.getenv("PMS_PROJECT_ROOT", Path.cwd()))
 MEMORY_DIR = PROJECT_ROOT / "memory"
 DOCS_DIR = PROJECT_ROOT / "docs"
-BACKLOG_DIR = DOCS_DIR / "backlog"
-BLUEPRINT_CHANGES_CSV = DOCS_DIR / "blueprint_changes.csv"
+
+# Cache for memory_index paths
+_memory_index_cache = None
 
 ISO_FMT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -366,35 +367,58 @@ def _get_next_change_id() -> int:
 # Path resolver
 # ---------------------------------------------------------------------------
 
+def _load_memory_index() -> dict:
+    """Load memory index with caching."""
+    global _memory_index_cache
+    if _memory_index_cache is None:
+        index_path = MEMORY_DIR / "memory_index.yaml"
+        with index_path.open('r', encoding='utf-8') as f:
+            import yaml
+            _memory_index_cache = yaml.safe_load(f)
+    return _memory_index_cache
+
 def _resolve_path(scope: str | Path) -> Path:
-    """Translate *scope* into an absolute Path inside the project."""
+    """Translate *scope* into an absolute Path using memory_index.yaml."""
     if isinstance(scope, Path):
         return scope
 
-    match scope:
-        case "memory_index":
-            return MEMORY_DIR / "memory_index.yaml"
-        case "project_status":
-            return MEMORY_DIR / "project_status.md"
-        case "blueprint":
-            return DOCS_DIR / "blueprint.md"
-        case "blueprint_changes":
-            return DOCS_DIR / "blueprint_changes.csv"
-        case str() if scope.startswith("backlog_f"):
-            # Extract phase number from backlog_f1, backlog_f2, etc.
-            try:
-                phase = scope.split("_f")[1]
-                return BACKLOG_DIR / f"backlog_f{phase}.yaml"
-            except (IndexError, ValueError):
-                raise ValueError(f"Invalid backlog scope format: {scope}")
-        case "backlog":
-            raise ValueError(
-                "Scope 'backlog' requires phase number, use 'backlog_f1', 'backlog_f2', etc."
-            )
-        case "raw":
-            raise ValueError("Scope 'raw' not implemented in MVP")
-        case _:
-            raise ValueError(f"Unknown scope: {scope}")
+    # Handle built-in scopes
+    if scope == "memory_index":
+        return MEMORY_DIR / "memory_index.yaml"
+    if scope == "project_status":
+        return MEMORY_DIR / "project_status.md"
+    
+    # Load memory index for dynamic paths
+    memory_index = _load_memory_index()
+    paths = memory_index.get('paths', {})
+    
+    # Handle dynamic scopes from memory_index
+    if scope == "blueprint":
+        blueprint_path = paths.get('blueprint_yaml', '../docs/02_blueprint.yaml')
+        return (MEMORY_DIR / blueprint_path).resolve()
+    
+    if scope == "blueprint_changes":
+        changes_path = paths.get('blueprint_changes', '../docs/blueprint_changes.csv')
+        return (MEMORY_DIR / changes_path).resolve()
+    
+    if scope.startswith("backlog_f"):
+        try:
+            phase = scope.split("_f")[1]
+            backlog_dir = paths.get('backlog_modular', '../docs/05_backlog/')
+            backlog_path = (MEMORY_DIR / backlog_dir / f"backlog_f{phase}.yaml").resolve()
+            return backlog_path
+        except (IndexError, ValueError):
+            raise ValueError(f"Invalid backlog scope format: {scope}")
+    
+    if scope == "backlog":
+        raise ValueError(
+            "Scope 'backlog' requires phase number, use 'backlog_f1', 'backlog_f2', etc."
+        )
+    
+    if scope == "raw":
+        raise ValueError("Scope 'raw' not implemented in MVP")
+    
+    raise ValueError(f"Unknown scope: {scope}")
 
 
 # ---------------------------------------------------------------------------
@@ -433,7 +457,18 @@ def bootstrap_pms(project_name: str = "proyecto") -> bool:
         MEMORY_DIR.mkdir(parents=True, exist_ok=True)
         (MEMORY_DIR / "temp").mkdir(parents=True, exist_ok=True)
         DOCS_DIR.mkdir(parents=True, exist_ok=True)
-        BACKLOG_DIR.mkdir(parents=True, exist_ok=True)
+        # Create backlog directory from memory_index
+        memory_index_path = MEMORY_DIR / "memory_index.yaml"
+        if memory_index_path.exists():
+            with memory_index_path.open('r') as f:
+                import yaml
+                idx = yaml.safe_load(f)
+                backlog_rel = idx.get('paths', {}).get('backlog_modular', '../docs/05_backlog/')
+                backlog_dir = (MEMORY_DIR / backlog_rel).resolve()
+                backlog_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            # Fallback if no memory_index yet
+            (DOCS_DIR / "05_backlog").mkdir(parents=True, exist_ok=True)
         
         # 2. Generate memory_index.yaml with real values
         memory_index_content = f"""paths:

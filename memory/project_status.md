@@ -15,33 +15,39 @@ current_state:
   
   # Métricas para Burndown y Health
   metricas:
-    total_tareas: 7      # Plan consolidación completo
-    completadas: 3       # P1-DEVAGENT-001, P1-DEVAGENT-002, P1-TOPDOWN-005
+    total_tareas: 6      # Plan consolidación completo (P2-WATERFALL-006 eliminada)
+    completadas: 5       # P1-DEVAGENT-001, P1-DEVAGENT-002, P1-TOPDOWN-005, P1-VALIDACION-004, P1-CLEANUP-003
     en_progreso: 0
     bloqueadas: 0
     fallidas: 0
-    pendientes: 4        # P1-VALIDACION-004, P2-WATERFALL-006, P1-CLEANUP-003, P4-CLEANUP-007
+    pendientes: 1        # P4-CLEANUP-007
     
     # Health indicators
-    velocidad_sprint: 3.0        # 3 tareas completadas en progreso
-    porcentaje_completado: 42.9  # (3/7) * 100
-    porcentaje_bloqueadas: 0.0   # (0/7) * 100
+    velocidad_sprint: 5.0        # 5 tareas completadas en progreso
+    porcentaje_completado: 83.3  # (5/6) * 100
+    porcentaje_bloqueadas: 0.0   # (0/6) * 100
     
     # Burndown data
     sprints_transcurridos: 0
     sprints_estimados: 1
-    tareas_por_sprint_objetivo: 7.0
+    tareas_por_sprint_objetivo: 6.0
 ```
 
 ## Registro de Cambios (Cronológico Descendente)
 
+### 2025-08-11 - Tarea P2-WATERFALL-006 eliminada del backlog
+- **Acción**: Eliminación de tarea por solicitud usuario
+- **ID eliminada**: P2-WATERFALL-006 (Extraer metodología desde Waterfall_V-Model.md)
+- **Impacto**: Métricas actualizadas: 6 tareas totales, 83.3% completado
+- **Estado final**: Solo P4-CLEANUP-007 pendiente (eliminar archivos redundantes)
+
 ### 2025-08-10 - Fase 0: Consolidación Documental iniciada
 - **Milestone**: Plan consolidación documental completo implementado
-- **Tareas completadas**: P1-DEVAGENT-001, P1-DEVAGENT-002, P1-TOPDOWN-005
+- **Tareas completadas**: P1-DEVAGENT-001, P1-DEVAGENT-002, P1-TOPDOWN-005, P1-VALIDACION-004, P1-CLEANUP-003
 - **Gap crítico resuelto**: DevAgent formalmente responsable de Blueprint→TechSpecs
 - **Corrección**: Plan ajustado preservando archivos canónicos de consolidación
-- **Estado**: 42.9% progreso (3/7 tareas), velocidad 3.0 tareas/sprint
-- **Próximo**: P2-WATERFALL-006 (metodología a blueprint.yaml)
+- **Estado**: 83.3% progreso (5/6 tareas), velocidad 5.0 tareas/sprint
+- **Próximo**: P4-CLEANUP-007 (cleanup archivos redundantes)
 
 ### 2025-08-09 - Análisis consolidación documental
 - **Análisis**: Identificados 8 archivos sueltos fragmentando documentación

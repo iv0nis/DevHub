@@ -190,36 +190,6 @@ historias:
         - "Políticas de retroalimentación y propagación"
         - "Eventos: BlueprintChangeEvent, RoadmapChangeEvent"
 
-  P2-WATERFALL-006:
-    # Esenciales (E1-E5)
-    id: "P2-WATERFALL-006"
-    title: "Extraer metodología desde Waterfall_V-Model.md a blueprint.yaml"
-    phase: "F0"
-    status: "todo"
-    priority: "P1"
-    
-    # Básicos (B1, B5-B7)
-    description: "Crear sección 'metodologia_y_estandares' en blueprint.yaml con justificación metodológica única"
-    dependencies: []
-    created_at: "2025-08-10T00:00:00Z"
-    updated_at: "2025-08-10T00:00:00Z"
-    
-    # Extendidos (X4, X7)
-    blocked_by: ""
-    notes:
-      devagent_observations: "Enriquecimiento P2: Justificación metodológica tiene valor único"
-      manual_comments: "Extracción selectiva de justificación Waterfall/V-Model"
-      last_failure_reason: ""
-    
-    # Información específica
-    cambios_requeridos:
-      archivo_origen: "docs/Waterfall_V-Model.md"
-      destino: "docs/blueprint.yaml"
-      nueva_seccion: "metodologia_y_estandares"
-      contenido_integrar:
-        - "Metodología aplicada: Waterfall/V-Model con documentación exhaustiva"
-        - "Alineación estándares: ISO/IEC/IEEE 42010, arc42"
-        - "Justificación técnica de decisiones metodológicas"
 
   P4-CLEANUP-007:
     # Esenciales (E1-E5)
@@ -231,7 +201,7 @@ historias:
     
     # Básicos (B1, B5-B7)
     description: "Eliminar archivo redundante real (DevHubDocs.md) preservando archivos de consolidación canónica"
-    dependencies: ["P1-TOPDOWN-005", "P2-WATERFALL-006"]
+    dependencies: ["P1-TOPDOWN-005"]
     created_at: "2025-08-10T00:00:00Z"
     updated_at: "2025-08-10T00:00:00Z"
     
@@ -259,9 +229,9 @@ historias:
       - "Validar que estructura modular cubre funcionalidad"
 
 # Métricas Fase 0:
-# Total tasks: 7 (plan consolidación completo)
+# Total tasks: 6 (plan consolidación completo)
 # P0 (Critical): 2 tasks (integración canónica DevAgent + Topdown)
-# P1 (High): 3 tasks (template sync + validación + metodología)
+# P1 (High): 2 tasks (template sync + validación)
 # P2 (Medium): 2 tasks (cleanup DevAgent + archivo redundante real)
 # Objetivo: Eliminar fragmentación documental completa
 # Resultado: Secciones canónicas únicas, 2 archivos eliminados, arquitectura consolidación preservada
