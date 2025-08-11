@@ -276,11 +276,13 @@ historias:
       manual_comments: "EnvironmentConfig dataclass, settings per environment"
       last_failure_reason: ""
 
-# Métricas Fase 1:
+# === MÉTRICAS FASE 1 ===
 # Total tasks: 13
-# P0 (Critical): 3 tasks
-# P1 (High): 3 tasks  
-# P2 (Medium): 5 tasks
-# P3 (Low): 2 tasks
-# Estimated sprints: 3 (4-5 tasks per sprint)
-# Dependencies: Longest path TS-PMS-001 -> TS-DAS-001 -> TS-CLI-001 -> TS-CLI-002
+# P0 (Critical): 3 tasks - Core PMS, DAS, memory_index
+# P1 (High): 4 tasks - Agent configs, CLI básico, Event system
+# P2 (Medium): 4 tasks - Web setup, API routes, Templates, Testing
+# P3 (Low): 2 tasks - Dashboard UI, Configuration
+# Estimated sprints: 3 (Sprint 1-3)
+# Critical path: TS-PMS-001 → TS-DAS-001 → TS-CLI-001 → TS-CLI-002
+# Focus areas: Core Systems (40%), CLI (30%), Web (20%), Architecture (10%)
+# Translation source: TechSpecs docs/03_TechSpecs/2_modulos/ complete modules

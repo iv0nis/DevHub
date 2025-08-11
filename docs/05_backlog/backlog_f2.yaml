@@ -1,0 +1,268 @@
+# Backlog Fase 2 · Sprint 4-6
+# DevHub v1.0 - Implementación Avanzada y Web Dashboard
+fase: 2
+sprint: 4
+historias:
+  TS-WEB-001:
+    # === INFORMACIÓN BÁSICA ===
+    id: "TS-WEB-001"
+    title: "Setup Web Dashboard MVP - Next.js base project"
+    description: "Crear proyecto Next.js base con TypeScript, Tailwind CSS, React Query y estructura de directorios según TechSpec para dashboard web."
+    
+    # === INFORMACIÓN TÉCNICA PARA DEVAGENT ===
+    archivos_involucrados: ["mvp-wizard/package.json", "mvp-wizard/next.config.js", "mvp-wizard/tailwind.config.js", "mvp-wizard/tsconfig.json"]
+    estado: "todo"
+    prioridad: "P1"
+    
+    # === VALOR ESTRATÉGICO PARA HUMANOS ===
+    valor_estrategico: "Alto. Establece interfaz web para monitoreo y gestión visual del proyecto DevHub."
+    sprint_fase: "Sprint 4 (DevHub) – épica Web Dashboard"
+    
+    # === CRITERIOS DE ACEPTACIÓN ===
+    criterios_aceptacion:
+      - "Dado el directorio mvp-wizard/, cuando se ejecuta npm run dev, entonces inicia servidor Next.js sin errores"
+      - "Dado la configuración TypeScript, cuando se compila proyecto, entonces no hay errores de tipos"
+      - "validate_nextjs_setup('mvp-wizard/')"
+    
+    # === REFERENCIAS Y TRAZABILIDAD ===
+    referencias: "Ver TechSpec docs/03_TechSpecs/2_modulos/web_dashboard.md - setup inicial"
+    
+    # === CONTROL DE FLUJO ===
+    dependencias: []
+    bloqueado_por: ""
+    aprobacion: "Requiere validación de dependencias Node.js"
+    
+    # === METADATOS ===
+    created_at: "2025-08-11T00:00:00Z"
+    updated_at: "2025-08-11T00:00:00Z"
+    
+    # === OBSERVACIONES ===
+    notas:
+      devagent_observations: "Proyecto web independiente de core Python"
+      manual_comments: "package.json, next.config.js, tailwind.config.js setup"
+      last_failure_reason: ""
+
+  TS-WEB-002:
+    id: "TS-WEB-002"
+    title: "Implementar API routes para Project Status y Blueprint"
+    description: "Desarrollar API routes /api/project/status y /api/blueprint/completeness con integración Python via PythonShell para acceso a datos PMS."
+    
+    archivos_involucrados: ["mvp-wizard/pages/api/project/status.ts", "mvp-wizard/pages/api/blueprint/completeness.ts", "mvp-wizard/lib/python-integration.ts"]
+    estado: "todo"
+    prioridad: "P1"
+    
+    valor_estrategico: "Crítico. Conecta interfaz web con datos del sistema PMS Core."
+    sprint_fase: "Sprint 4 (DevHub) – épica Web Dashboard"
+    
+    criterios_aceptacion:
+      - "Dado /api/project/status, cuando se hace GET request, entonces retorna JSON válido con estado del proyecto"
+      - "Dado /api/blueprint/completeness, cuando se accede, entonces retorna porcentaje de completitud"
+      - "test_api_routes(['status', 'completeness'])"
+    
+    referencias: "Ver TechSpec docs/03_TechSpecs/2_modulos/web_dashboard.md - API integration"
+    
+    dependencias: ["TS-WEB-001", "TS-PMS-001"]
+    bloqueado_por: ""
+    aprobacion: "Requiere PMS operativo para data access"
+    
+    created_at: "2025-08-11T00:00:00Z"
+    updated_at: "2025-08-11T00:00:00Z"
+    
+    notas:
+      devagent_observations: "Requiere PMS operativo para data access"
+      manual_comments: "NextApiRequest/Response handlers, error handling"
+      last_failure_reason: ""
+
+  TS-WEB-003:
+    id: "TS-WEB-003"
+    title: "Implementar componentes Dashboard principales"
+    description: "Desarrollar ProjectOverview, BlueprintStatus, AgentActivity y DocumentSync components con Recharts para visualizaciones de estado del proyecto."
+    
+    archivos_involucrados: ["mvp-wizard/components/ProjectOverview.tsx", "mvp-wizard/components/BlueprintStatus.tsx", "mvp-wizard/components/AgentActivity.tsx", "mvp-wizard/components/DocumentSync.tsx"]
+    estado: "todo"
+    prioridad: "P2"
+    
+    valor_estrategico: "Alto. Provee visualización interactiva del estado del proyecto DevHub."
+    sprint_fase: "Sprint 5 (DevHub) – épica UI Components"
+    
+    criterios_aceptacion:
+      - "Dado los componentes principales, cuando se renderizan, entonces muestran datos del proyecto correctamente"
+      - "Dado Recharts integration, cuando se cargan métricas, entonces genera gráficos visuales"
+      - "validate_dashboard_components(['ProjectOverview', 'BlueprintStatus', 'AgentActivity'])"
+    
+    referencias: "Ver TechSpec docs/03_TechSpecs/2_modulos/web_dashboard.md - componentes UI"
+    
+    dependencias: ["TS-WEB-002"]
+    bloqueado_por: ""
+    aprobacion: "Requiere UX review de componentes"
+    
+    created_at: "2025-08-11T00:00:00Z"
+    updated_at: "2025-08-11T00:00:00Z"
+    
+    notas:
+      devagent_observations: "UI components con data from API routes"
+      manual_comments: "React components, TypeScript interfaces, responsive design"
+      last_failure_reason: ""
+
+  TS-CLI-002:
+    id: "TS-CLI-002"
+    title: "Implementar sistema de templates y project creation"
+    description: "Crear sistema de templates Jinja2 para generación automática de proyectos DevHub con estructura estándar y configuraciones base."
+    
+    archivos_involucrados: ["templates/default/", "templates/enterprise/", "cli/project_creator.py", "cli/template_engine.py"]
+    estado: "todo"
+    prioridad: "P1"
+    
+    valor_estrategico: "Alto. Facilita creación rápida de nuevos proyectos DevHub con estructura estándar."
+    sprint_fase: "Sprint 4 (DevHub) – épica CLI Avanzado"
+    
+    criterios_aceptacion:
+      - "Dado template default/, cuando se crea proyecto, entonces genera estructura completa válida"
+      - "Dado Jinja2 engine, cuando se procesan templates, entonces sustituye variables correctamente"
+      - "validate_project_creation('test-project', 'default')"
+    
+    referencias: "Ver TechSpec docs/03_TechSpecs/2_modulos/cli_devhub.md líneas 117-193"
+    
+    dependencias: ["TS-CLI-001"]
+    bloqueado_por: ""
+    aprobacion: "Requiere validación de templates"
+    
+    created_at: "2025-08-11T00:00:00Z"
+    updated_at: "2025-08-11T00:00:00Z"
+    
+    notas:
+      devagent_observations: "Templates base ya existen en docs/doc_templates/"
+      manual_comments: "Template engine, directory creation, Git initialization"
+      last_failure_reason: ""
+
+  TS-CLI-003:
+    id: "TS-CLI-003"
+    title: "Implementar agent-run command y execution system"
+    description: "Desarrollar comando para ejecutar tareas específicas con agentes, incluyendo AgentRunner, timeout management y reporting detallado."
+    
+    archivos_involucrados: ["cli/agent_runner.py", "cli/execution_context.py", "devhub_cli.py"]
+    estado: "todo"
+    prioridad: "P1"
+    
+    valor_estrategico: "Crítico. Permite ejecución controlada de agentes desde CLI con monitoreo y timeouts."
+    sprint_fase: "Sprint 5 (DevHub) – épica Agent Execution"
+    
+    criterios_aceptacion:
+      - "Dado comando agent-run, cuando se ejecuta tarea, entonces completa con timeout apropiado"
+      - "Dado AgentRunner, cuando ejecuta agente, entonces genera reporte detallado"
+      - "test_agent_execution('DevAgent', 'next-task', timeout=60)"
+    
+    referencias: "Ver TechSpec docs/03_TechSpecs/2_modulos/cli_devhub.md líneas 418-498"
+    
+    dependencias: ["TS-DAS-002"]
+    bloqueado_por: ""
+    aprobacion: "Requiere integración CLI con DAS enforcer"
+    
+    created_at: "2025-08-11T00:00:00Z"
+    updated_at: "2025-08-11T00:00:00Z"
+    
+    notas:
+      devagent_observations: "Integración CLI con DAS enforcer"
+      manual_comments: "ExecutionResult, task mapping, timeout context"
+      last_failure_reason: ""
+
+  TS-ARCH-001:
+    id: "TS-ARCH-001"
+    title: "Implementar Event System y Observer Pattern"
+    description: "Desarrollar EventPublisher, SystemEvent classes y event-driven communication entre componentes según arquitectura especificada."
+    
+    archivos_involucrados: ["core/events.py", "core/event_publisher.py", "core/observers.py"]
+    estado: "todo"
+    prioridad: "P1"
+    
+    valor_estrategico: "Alto. Establece comunicación desacoplada entre componentes del sistema."
+    sprint_fase: "Sprint 5 (DevHub) – épica Arquitectura Avanzada"
+    
+    criterios_aceptacion:
+      - "Dado EventPublisher, cuando se publican eventos, entonces notifica observers registrados"
+      - "Dado SystemEvent, cuando se crean eventos, entonces contienen metadata completa"
+      - "validate_event_system(['publish', 'subscribe', 'notify'])"
+    
+    referencias: "Ver TechSpec docs/03_TechSpecs/3_diseno_detallado/arquitectura_sistema.md - eventos"
+    
+    dependencias: ["TS-DAS-001"]
+    bloqueado_por: ""
+    aprobacion: "Requiere review arquitectural de patrones"
+    
+    created_at: "2025-08-11T00:00:00Z"
+    updated_at: "2025-08-11T00:00:00Z"
+    
+    notas:
+      devagent_observations: "Observer pattern para desacoplamiento componentes"
+      manual_comments: "EventTypes, subscribers, async event processing"
+      last_failure_reason: ""
+
+  TS-CONFIG-001:
+    id: "TS-CONFIG-001"
+    title: "Implementar Configuration Management System"
+    description: "Desarrollar ConfigManager con soporte multi-environment (development, production, testing) según arquitectura especificada."
+    
+    archivos_involucrados: ["core/config_manager.py", "config/development.yaml", "config/production.yaml", "config/testing.yaml"]
+    estado: "todo"
+    prioridad: "P2"
+    
+    valor_estrategico: "Medio. Facilita deployment y configuración por entorno."
+    sprint_fase: "Sprint 6 (DevHub) – épica Configuration"
+    
+    criterios_aceptacion:
+      - "Dado ConfigManager, cuando se carga config, entonces aplica settings específicos del environment"
+      - "Dado multi-environment support, cuando cambia ENV, entonces carga configuración apropiada"
+      - "validate_config_management(['development', 'production', 'testing'])"
+    
+    referencias: "Ver TechSpec docs/03_TechSpecs/2_modulos/ - configuration patterns"
+    
+    dependencias: ["TS-ARCH-001"]
+    bloqueado_por: ""
+    aprobacion: "Requiere definición de environments"
+    
+    created_at: "2025-08-11T00:00:00Z"
+    updated_at: "2025-08-11T00:00:00Z"
+    
+    notas:
+      devagent_observations: "Environment-specific configs para deployment"
+      manual_comments: "EnvironmentConfig dataclass, settings per environment"
+      last_failure_reason: ""
+
+  TS-TEST-002:
+    id: "TS-TEST-002"
+    title: "Implementar test suite avanzado para Web y CLI"
+    description: "Crear integration tests y end-to-end tests para Web Dashboard y CLI commands con coverage completo de user workflows."
+    
+    archivos_involucrados: ["tests/test_web_integration.py", "tests/test_cli_e2e.py", "tests/test_user_workflows.py"]
+    estado: "todo"
+    prioridad: "P2"
+    
+    valor_estrategico: "Alto. Garantiza calidad y estabilidad de interfaces de usuario."
+    sprint_fase: "Sprint 6 (DevHub) – épica Quality Assurance"
+    
+    criterios_aceptacion:
+      - "Dado test suite web, cuando se ejecutan tests, entonces valida todos los componentes dashboard"
+      - "Dado CLI e2e tests, cuando se prueban comandos, entonces verifican workflows completos"
+      - "achieve_test_coverage(target=85, scope=['web', 'cli'])"
+    
+    referencias: "Ver TechSpec docs/03_TechSpecs/8_pruebas/ - estrategia testing"
+    
+    dependencias: ["TS-WEB-003", "TS-CLI-003"]
+    bloqueado_por: ""
+    aprobacion: "Requiere definición de test strategy"
+    
+    created_at: "2025-08-11T00:00:00Z"
+    updated_at: "2025-08-11T00:00:00Z"
+    
+    notas:
+      devagent_observations: "E2E testing crítico para user experience"
+      manual_comments: "Selenium/Playwright para web, Click testing para CLI"
+      last_failure_reason: ""
+
+# === MÉTRICAS FASE 2 ===
+# Total tasks: 8
+# P1 (High): 5 tasks
+# P2 (Medium): 3 tasks  
+# Estimated sprints: 3 (Sprint 4-6)
+# Focus areas: Web Dashboard (3), CLI Avanzado (2), Architecture (2), Testing (1)
+# Dependencies: Web depende de PMS/DAS, CLI depende de DAS, Architecture es base para Config
