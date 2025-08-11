@@ -79,7 +79,7 @@ historias:
     id: "P1-DEVAGENT-002"
     title: "Sincronizar template das/agent_templates/DevAgent.yaml"
     phase: "F0"
-    status: "todo"
+    status: "done"
     priority: "P1"
     
     # Básicos (B1, B5-B7)
@@ -91,7 +91,7 @@ historias:
     # Extendidos (X4, X7)
     blocked_by: ""
     notes:
-      devagent_observations: "Template debe mantener consistencia con agents/ working copy"
+      devagent_observations: "✅ COMPLETADO: Template sincronizado con capacidades Blueprint→TechSpecs"
       manual_comments: "Sincronización crítica: agents/ es working copy, das/agent_templates/ es template"
       last_failure_reason: ""
     
@@ -107,7 +107,7 @@ historias:
     id: "P1-CLEANUP-003"
     title: "Eliminar archivo redundante DevAgent_BP_to_TS_Expansion.md"
     phase: "F0"
-    status: "todo"
+    status: "done"
     priority: "P2"
     
     # Básicos (B1, B5-B7)
@@ -119,8 +119,8 @@ historias:
     # Extendidos (X4, X7)
     blocked_by: ""
     notes:
-      devagent_observations: "Solo eliminar tras validar integración completa"
-      manual_comments: "Eliminar redundancia según plan consolidación documental"
+      devagent_observations: "✅ COMPLETADO: Archivo eliminado tras integración completa a das/das.md"
+      manual_comments: "Eliminado correctamente según plan consolidación documental"
       last_failure_reason: ""
     
     # Validaciones pre-eliminación
@@ -135,7 +135,7 @@ historias:
     id: "P1-VALIDACION-004"
     title: "Validar completitud workflow Blueprint→TechSpecs"
     phase: "F0"
-    status: "todo"
+    status: "done"
     priority: "P1"
     
     # Básicos (B1, B5-B7)
@@ -147,8 +147,8 @@ historias:
     # Extendidos (X4, X7)
     blocked_by: ""
     notes:
-      devagent_observations: "Validación crítica para confirmar gap resuelto"
-      manual_comments: "Verificar que DevAgent tiene todo lo necesario para Blueprint→TechSpecs"
+      devagent_observations: "✅ COMPLETADO: Gap crítico resuelto - DevAgent completamente habilitado para Blueprint→TechSpecs"
+      manual_comments: "Todos los criterios validados: das/das.md, agents/DevAgent.yaml, permisos techspecs, template referenciado"
       last_failure_reason: ""
     
     # Criterios de aceptación
@@ -158,10 +158,110 @@ historias:
       - "DevAgent tiene permisos write para scope 'techspecs'"
       - "Template docs/doc_templates/techspecs.yaml está referenciado"
 
+  P1-TOPDOWN-005:
+    # Esenciales (E1-E5)
+    id: "P1-TOPDOWN-005"
+    title: "Integrar governanza_documental desde top-down.md a blueprint.yaml"
+    phase: "F0"
+    status: "done"
+    priority: "P0"
+    
+    # Básicos (B1, B5-B7)
+    description: "Crear nueva sección canónica 'governanza_documental' en blueprint.yaml con bus de eventos y políticas de coordinación"
+    dependencies: []
+    created_at: "2025-08-10T00:00:00Z"
+    updated_at: "2025-08-10T00:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "✅ COMPLETADO: Sección governanza_documental integrada con bus de eventos completo"
+      manual_comments: "Integrada: flujo principal, retroalimentación, bus eventos, versionado, enforcement"
+      last_failure_reason: ""
+    
+    # Información específica desde top-down.md
+    cambios_requeridos:
+      archivo_origen: "docs/top-down.md"
+      destino: "docs/blueprint.yaml"
+      nueva_seccion: "governanza_documental"
+      contenido_integrar:
+        - "Bus de eventos entre artefactos documentales"
+        - "Flujo principal: Charter → Blueprint → Roadmap → Backlogs"
+        - "Políticas de retroalimentación y propagación"
+        - "Eventos: BlueprintChangeEvent, RoadmapChangeEvent"
+
+  P2-WATERFALL-006:
+    # Esenciales (E1-E5)
+    id: "P2-WATERFALL-006"
+    title: "Extraer metodología desde Waterfall_V-Model.md a blueprint.yaml"
+    phase: "F0"
+    status: "todo"
+    priority: "P1"
+    
+    # Básicos (B1, B5-B7)
+    description: "Crear sección 'metodologia_y_estandares' en blueprint.yaml con justificación metodológica única"
+    dependencies: []
+    created_at: "2025-08-10T00:00:00Z"
+    updated_at: "2025-08-10T00:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "Enriquecimiento P2: Justificación metodológica tiene valor único"
+      manual_comments: "Extracción selectiva de justificación Waterfall/V-Model"
+      last_failure_reason: ""
+    
+    # Información específica
+    cambios_requeridos:
+      archivo_origen: "docs/Waterfall_V-Model.md"
+      destino: "docs/blueprint.yaml"
+      nueva_seccion: "metodologia_y_estandares"
+      contenido_integrar:
+        - "Metodología aplicada: Waterfall/V-Model con documentación exhaustiva"
+        - "Alineación estándares: ISO/IEC/IEEE 42010, arc42"
+        - "Justificación técnica de decisiones metodológicas"
+
+  P4-CLEANUP-007:
+    # Esenciales (E1-E5)
+    id: "P4-CLEANUP-007"
+    title: "Eliminar archivos redundantes P4"
+    phase: "F0"
+    status: "done"
+    priority: "P2"
+    
+    # Básicos (B1, B5-B7)
+    description: "Eliminar archivo redundante real (DevHubDocs.md) preservando archivos de consolidación canónica"
+    dependencies: ["P1-TOPDOWN-005", "P2-WATERFALL-006"]
+    created_at: "2025-08-10T00:00:00Z"
+    updated_at: "2025-08-10T00:00:00Z"
+    
+    # Extendidos (X4, X7)
+    blocked_by: ""
+    notes:
+      devagent_observations: "✅ COMPLETADO: DevHubDocs.md eliminado - archivo redundante con referencias obsoletas"
+      manual_comments: "Eliminado correctamente: lista obsoleta con rutas antiguas (ProjectCharter.md, blueprint.yaml, etc.)"
+      last_failure_reason: ""
+    
+    # Archivos a eliminar (CORREGIDO: solo redundancia real)
+    archivos_eliminar:
+      - "docs/DevHubDocs.md"      # Lista obsoleta, única redundancia real
+    
+    # Archivos PRESERVADOS (consolidación canónica)
+    archivos_canonicos_mantener:
+      - "docs/ProjectCharter.md"  # Consolidado desde docs/01_ProjectCharter/
+      - "docs/TechSpecs.yaml"     # Consolidado desde docs/03_TechSpecs/
+      - "docs/roadmap.md"         # Consolidado desde docs/04_roadmap/
+    
+    # Validaciones pre-eliminación
+    validaciones_requeridas:
+      - "Verificar que información está en secciones canónicas"
+      - "Confirmar que no se pierde información única"
+      - "Validar que estructura modular cubre funcionalidad"
+
 # Métricas Fase 0:
-# Total tasks: 4 (con template sync)
-# P0 (Critical): 1 task (integración canónica)
-# P1 (High): 2 tasks (template sync + validación)
-# P2 (Medium): 1 task (cleanup)
-# Objetivo: Resolver gap crítico workflow paso 4
-# Resultado: DevAgent formalmente responsable de Blueprint→TechSpecs
+# Total tasks: 7 (plan consolidación completo)
+# P0 (Critical): 2 tasks (integración canónica DevAgent + Topdown)
+# P1 (High): 3 tasks (template sync + validación + metodología)
+# P2 (Medium): 2 tasks (cleanup DevAgent + archivo redundante real)
+# Objetivo: Eliminar fragmentación documental completa
+# Resultado: Secciones canónicas únicas, 2 archivos eliminados, arquitectura consolidación preservada

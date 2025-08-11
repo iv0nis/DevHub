@@ -1,7 +1,7 @@
 # ADR-003: CLI/Web como Interfaces Principales
 
-## Estado
-Aceptado
+**Estado:** Aceptado  
+**Fecha:** 2025-08-09
 
 ## Contexto
 El Charter especifica que **integración profunda con IDEs externos** está **Out-of-Scope**. Esto requiere definir las interfaces principales para interactuar con DevHub.
@@ -49,34 +49,20 @@ GET /api/documents/sync-status       # Estado sincronización
 
 ## Consecuencias
 
-### Positivas
-- ✅ Compatibilidad universal (cualquier editor/IDE)
-- ✅ Desarrollo y mantenimiento simplificado
-- ✅ Testing más sencillo (menos interfaces)
-- ✅ Documentación concentrada
-- ✅ Flexibilidad para integraciones futuras
+**Positivas:**
++ Compatibilidad universal (cualquier editor/IDE)
++ Desarrollo y mantenimiento simplificado
++ Testing más sencillo (menos interfaces)
++ Documentación concentrada
++ Flexibilidad para integraciones futuras
 
-### Negativas
-- ❌ No features avanzadas de IDE (autocomplete, debugging)
-- ❌ Context switching entre herramientas
-- ❌ Menor productividad vs deep integration
-- ❌ Curva de aprendizaje de CLI
+**Negativas:**
+- No features avanzadas de IDE (autocomplete, debugging)
+- Context switching entre herramientas
+- Menor productividad vs deep integration
+- Curva de aprendizaje de CLI
 
-### Mitigaciones
-- CLI con autocompletado y help contextual
-- Web dashboard responsive para uso en segunda pantalla
-- APIs documentadas para integraciones custom
-- Shortcuts y aliases para comandos frecuentes
-- Plugins simples para IDEs populares (futuro v2.0)
-
-## Integración con Workflow
-1. **Desarrollo**: CLI para tareas técnicas (sync, validate, run agents)
-2. **Monitoreo**: Web dashboard para tracking y métricas
-3. **Reporting**: APIs para herramientas externas de reporting
-4. **Colaboración**: Web para compartir estado con stakeholders
-
-## Fecha
-2025-08-09
-
-## Revisar
-Basado en feedback de desarrolladores sobre friction en workflow
+## Alternativas Evaluadas
+- **Plugins IDE específicos**: Descartado por restricción Charter (Out-of-Scope)
+- **Solo Web**: Descartada por limitaciones en automatización
+- **Solo CLI**: Descartada por falta de visualización para stakeholders

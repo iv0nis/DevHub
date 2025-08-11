@@ -1,7 +1,7 @@
 # ADR-001: Arquitectura Local Filesystem-Based
 
-## Estado
-Aceptado
+**Estado:** Aceptado  
+**Fecha:** 2025-08-09
 
 ## Contexto
 El Charter especifica explícitamente que el hosting/infraestructura en la nube está **Out-of-Scope** para DevHub v1.0. Esta restricción requiere definir una arquitectura que funcione completamente en entornos locales.
@@ -22,27 +22,20 @@ Implementar DevHub con arquitectura **filesystem-based local**:
 
 ## Consecuencias
 
-### Positivas
-- ✅ Zero setup infrastructure
-- ✅ Funciona offline completamente
-- ✅ Control total de datos por usuario
-- ✅ Backup simple (Git + filesystem)
-- ✅ No costos de hosting
+**Positivas:**
++ Zero setup infrastructure
++ Funciona offline completamente
++ Control total de datos por usuario
++ Backup simple (Git + filesystem)
++ No costos de hosting
 
-### Negativas  
-- ❌ No colaboración real-time entre máquinas
-- ❌ Backup manual requerido
-- ❌ Escalabilidad limitada por I/O local
-- ❌ No centralización de métricas
+**Negativas:**
+- No colaboración real-time entre máquinas
+- Backup manual requerido
+- Escalabilidad limitada por I/O local
+- No centralización de métricas
 
-### Mitigaciones
-- Git para versionado y colaboración asíncrona
-- Scripts de backup automático
-- Optimización I/O con caching
-- Export de métricas para agregación externa
-
-## Fecha
-2025-08-09
-
-## Revisar
-Cuando se considere DevHub v2.0 con capacidades cloud
+## Alternativas Evaluadas
+- **Arquitectura cloud-native**: Descartada por restricción Charter (Out-of-Scope)
+- **Base de datos local (SQLite)**: Descartada por simplicidad filesystem
+- **Híbrido local+cloud**: Descartada por complejidad y restricciones Charter

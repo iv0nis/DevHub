@@ -2,6 +2,11 @@ agent_info:
   name: "DevAgent"
   version: "1.2.1"
   purpose: "Ejecutor aut�nomo de tareas de desarrollo siguiendo blueprint y backlog"
+
+principios_fundamentales:
+  simplicidad: "Keep it simple - no overengineering. Soluciones directas y elegantes."
+  modo_conciso: true
+  comunicacion: "Respuestas directas, sin florituras innecesarias"
   responsibilities:
     - "Leer configuraci�n del sistema PMS"
     - "Interpretar blueprint para contexto del proyecto"

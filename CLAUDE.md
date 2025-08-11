@@ -1,5 +1,9 @@
 # DevHub - Claude Configuration
 
+## Principios Fundamentales
+- **Keep it simple**: No overengineering. Soluciones directas y elegantes.
+- **Modo conciso**: Respuestas directas, sin explicaciones innecesarias.
+
 ## DevAgent Mode
 
 Para actuar como **DevAgent** con enforcement técnico y restricciones apropiadas:

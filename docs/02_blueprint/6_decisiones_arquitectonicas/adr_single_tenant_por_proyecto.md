@@ -1,7 +1,7 @@
 # ADR-002: Single-Tenant por Proyecto
 
-## Estado
-Aceptado
+**Estado:** Aceptado  
+**Fecha:** 2025-08-09
 
 ## Contexto
 El Charter especifica que **multi-tenant entre organizaciones** está **Out-of-Scope**. Esto define la estrategia de aislamiento y gestión de proyectos en DevHub.
@@ -49,27 +49,20 @@ Project_Beta/            # Instancia independiente
 
 ## Consecuencias
 
-### Positivas
-- ✅ Aislamiento completo de datos
-- ✅ Configuración personalizable por proyecto
-- ✅ Debugging y troubleshooting simplificado
-- ✅ Escalabilidad horizontal natural
-- ✅ Backup/restore granular
+**Positivas:**
++ Aislamiento completo de datos
++ Configuración personalizable por proyecto
++ Debugging y troubleshooting simplificado
++ Escalabilidad horizontal natural
++ Backup/restore granular
 
-### Negativas
-- ❌ Duplicación de configuraciones similares
-- ❌ Mantenimiento múltiple de instancias
-- ❌ No economías de escala en recursos
-- ❌ Sincronización manual entre proyectos relacionados
+**Negativas:**
+- Duplicación de configuraciones similares
+- Mantenimiento múltiple de instancias
+- No economías de escala en recursos
+- Sincronización manual entre proyectos relacionados
 
-### Mitigaciones
-- Templates para configuración rápida de nuevos proyectos
-- Scripts de sincronización para proyectos relacionados
-- Tooling para gestión masiva de instancias
-- Documentación de best practices
-
-## Fecha
-2025-08-09
-
-## Revisar
-Si el feedback del usuario indica necesidad de gestión centralizada
+## Alternativas Evaluadas
+- **Multi-tenant compartido**: Descartado por restricción Charter (Out-of-Scope)
+- **Instancia única global**: Descartada por complejidad de aislamiento
+- **Microservicios por proyecto**: Descartada por overhead de infraestructura

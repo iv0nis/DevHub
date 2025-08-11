@@ -2,23 +2,21 @@
 
 # Specs
 specs:
-  devhub: "../docs/DevHub.md"
   das: "../das/das.md"  
   pms: "../pms/pms.md"
 
 # Agentes
 agents:
-  ai_project_manager: "../das/agents/AiProjectManager.yaml"
-  blueprint_agent: "../das/agents/BluePrintAgent.yaml"
-  dev_agent: "../das/agents/DevAgent.yaml"
-  qa_agent: "../das/agents/QAAgent.yaml"
+  ai_project_manager: "../agents/AiProjectManager.yaml"
+  blueprint_agent: "../agents/BlueprintAgent.yaml"
+  dev_agent: "../agents/DevAgent.yaml"
+  prompt_agent: "../agents/PromptAgent.yaml"
 
 # Templates
 templates:
   memory_templates: "../pms/memory_templates/"
-  agent_templates: "../das/agents/"
+  agent_templates: "../das/agent_templates/"
   doc_templates: "../docs/doc_templates/"  
-
 
 # Overviews  
 overviews:
@@ -28,16 +26,24 @@ overviews:
 
 # Scripts
 scripts:
-  pms_core: "../pms_core.py"
+  pms_core: "../pms/pms_core.py"
   enforcer: "../das/enforcer.py"
   devhub_cli: "../devhub_cli.py"
 
-# Legacy paths (mantener compatibilidad)
+# Rutas actualizadas estructura actual
 paths:
   status: "./project_status.md"
-  blueprint: "../docs/blueprint.md"
+  charter_modular: "../docs/01_ProjectCharter/"
+  charter_yaml: "../docs/01_ProjectCharter.yaml"
+  blueprint_modular: "../docs/02_blueprint/"
+  blueprint_yaml: "../docs/02_blueprint.yaml"
   blueprint_changes: "../docs/blueprint_changes.csv"
-  backlog_dir: "../docs/backlog/"
+  techspecs_modular: "../docs/03_TechSpecs/"
+  techspecs_yaml: "../docs/03_TechSpecs.yaml"
+  roadmap_modular: "../docs/04_roadmap/"
+  roadmap_yaml: "../docs/04_roadmap.yaml"
+  backlog_modular: "../docs/05_backlog/"
+  backlog_yaml: "../docs/05_backlog.yaml"
 
 config:
   rollback_dual: true        # transacciones atómicas
