@@ -42,7 +42,7 @@ class PermissionError(Exception):
 class DASEnforcer:
     """Technical enforcement system for DAS agent permissions"""
     
-    def __init__(self, agents_dir: str = "das/agent_templates", project_root: str = None):
+    def __init__(self, agents_dir: str = "agents", project_root: str = None):
         """Initialize enforcer with agent configurations directory"""
         self.agents_dir = Path(agents_dir)
         self.project_root = Path(project_root) if project_root else Path.cwd()
