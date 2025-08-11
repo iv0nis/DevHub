@@ -1,55 +1,48 @@
-# TS-WEB: Web Dashboard MVP
+# TechSpecs - Web Dashboard
 
-## 1. Descripción del Módulo
+## 1. Introducción
+
+### Propósito
+Especificar la implementación técnica del Web Dashboard UI, interfaz web que proporciona visualización en tiempo real del estado del proyecto, métricas de agentes, y control de operaciones del sistema DevHub.
+
+### Alcance
+- Implementación del frontend web con Next.js y componentes React
+- Integración con PMS Core para visualización de datos en tiempo real
+- Dashboard de métricas y KPIs del proyecto
+- Panel de control para operaciones de agentes
+- Sistema de notificaciones y alertas
+
+### Referencias
+- **Blueprint**: docs/02_blueprint.yaml (componentes.web_dashboard_ui)
+- **Charter**: docs/01_ProjectCharter.yaml
+- **HLD Components**: Pilar UI en arquitectura de 3 pilares (PMS + DAS + UI)
+- **User Stories**: US relacionadas con interfaz de usuario y visualización
+- **ADRs**: ADR-002 CLI + Web interfaces
+
+### Contexto
+- **Propósito**: Resolver la necesidad de interfaz visual para monitoreo y control del sistema DevHub
+- **Alcance incluido**: [Dashboard components, Real-time metrics, Agent control panel, Notification system, Responsive UI]
+- **Alcance excluido**: [Agent implementation, PMS operations, File system direct access, Authentication system]
+- **Suposiciones**: [Node.js disponible, PMS Core operativo, Puerto 3000 disponible, Navegador moderno]
+- **Restricciones**:
+  - **Técnicas**: [Next.js 13+, React 18+, TypeScript, Tailwind CSS]
+  - **Regulatorias**: [Solo lectura de datos críticos via API]
+  - **Temporales**: [Actualizaciones UI < 2 segundos, Load time < 3 segundos]
+
+## 2. Descripción del Módulo
 
 ### Información General
-- **Nombre**: DevHub Web Dashboard MVP
-- **ID**: TS-WEB-001  
-- **Responsabilidades**: Interface web para monitoreo de proyectos DevHub y visualización de métricas
-- **Relación con otros módulos**: Frontend web que consume APIs de PMS Core y DAS Enforcer
+- **Nombre**: Web Dashboard UI
+- **Responsabilidades**: Visualización de estado del proyecto, control de agentes, mostrar métricas en tiempo real, interfaz de usuario
+- **Relación con otros módulos**: Consume datos via PMS Core, muestra estado de DAS Enforcer, interfaz para control de agentes
 
-### Interfaces Principales
-```typescript
-interface WebDashboardAPI {
-  getProjectStatus(projectPath: string): Promise<ProjectStatus>
-  getBlueprintCompleteness(projectPath: string): Promise<CompletenessReport>
-  getAgentActivity(projectPath: string, limit?: number): Promise<ActivityLog[]>
-  getDocumentSyncStatus(projectPath: string): Promise<SyncStatus>
-  triggerAgent(agentName: string, task: string): Promise<ExecutionResult>
-}
-```
+### Diagramas
+- **Componentes**: docs/03_TechSpecs/3_diseno_detallado/componentes_web_dashboard.png
+- **Flujo de datos**: docs/03_TechSpecs/3_diseno_detallado/flujo_datos_dashboard.png
 
-## 2. Diseño Detallado
+## 3. Diseño Detallado
 
-### Arquitectura Web Stack
-```
-Web Dashboard Architecture:
-┌─────────────────────────────────────────┐
-│ React/Next.js Frontend                  │
-├─────────────────────────────────────────┤
-│ API Routes Layer (/api/*)               │
-├─────────────────────────────────────────┤  
-│ Backend Services Layer                  │
-├─────────────────────────────────────────┤
-│ PMS/DAS Integration Layer               │
-├─────────────────────────────────────────┤
-│ Filesystem Monitoring (Chokidar)       │
-└─────────────────────────────────────────┘
-```
-
-### Tech Stack Especificado
-```json
-{
-  "framework": "Next.js 14+",
-  "runtime": "Node.js 18+",
-  "ui_library": "React 18+",
-  "styling": "Tailwind CSS",
-  "state_management": "React Query + Zustand",
-  "charts": "Recharts",
-  "file_watching": "Chokidar",
-  "build_tool": "Vite/Next.js built-in"
-}
-```
+### Componentes y Estructura
 
 ### Estructura del Proyecto Web
 ```

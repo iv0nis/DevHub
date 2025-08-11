@@ -1,12 +1,40 @@
-# TS-PMS: Persistent Memory System Core
+# TechSpecs - PMS Core
 
-## 1. Descripción del Módulo
+## 1. Introducción
+
+### Propósito
+Especificar la implementación técnica del Persistent Memory System Core, sistema de persistencia fundamental que maneja carga, guardado, validación de integridad y operaciones atómicas de todos los artefactos del proyecto DevHub.
+
+### Alcance  
+- Implementación del sistema PMS Core con operaciones load/save
+- Validación SHA-1 automática para integridad de datos
+- Operaciones atómicas con rollback automático
+- Integración con memory_index.yaml para resolución dinámica de rutas
+- Manejo de concurrencia con file locking multiplataforma
+
+### Referencias
+- **Blueprint**: docs/02_blueprint.yaml (componentes.pms_persistent_memory_system)
+- **Charter**: docs/01_ProjectCharter.yaml
+- **HLD Components**: Pilar fundamental PMS en arquitectura de 3 pilares
+- **User Stories**: US relacionadas con persistencia de datos y integridad
+- **ADRs**: ADR-001 Arquitectura local filesystem, ADR-003 Single tenant por proyecto
+
+### Contexto
+- **Propósito**: Resolver persistencia confiable de artefactos del proyecto con validación automática de integridad
+- **Alcance incluido**: [Load/save operations, SHA validation, Atomic writes, Dynamic path resolution, File locking]
+- **Alcance excluido**: [Database operations, Network persistence, Agent orchestration, UI components]
+- **Suposiciones**: [Filesystem disponible, PyYAML instalado, Memory index configurado, Permisos de escritura]
+- **Restricciones**:
+  - **Técnicas**: [Python 3.8+, PyYAML dependency, Cross-platform file locking]
+  - **Regulatorias**: [Debe mantener integridad de datos críticos]
+  - **Temporales**: [Operaciones atómicas deben completar < 5 segundos]
+
+## 2. Descripción del Módulo
 
 ### Información General
-- **Nombre**: PMS Core (Persistent Memory System)
-- **ID**: TS-PMS-001
-- **Responsabilidades**: Sistema de memoria persistente confiable con validación de integridad y rollback atómico
-- **Relación con otros módulos**: Provee capa de persistencia para DAS Enforcer y todos los agentes
+- **Nombre**: PMS Core
+- **Responsabilidades**: Persistencia de artefactos, validación de integridad, operaciones atómicas, resolución de rutas, caching
+- **Relación con otros módulos**: Base para DAS Enforcer, consumido por todos los agentes via DAS, integra con memory_index.yaml
 
 ### Interfaces Principales
 ```python
