@@ -1,0 +1,66 @@
+environment: development
+database:
+  url: sqlite:///devhub.db
+  pool_size: 10
+  max_overflow: 20
+  echo: false
+  timeout: 30
+security:
+  api_key: null
+  jwt_expiry_hours: 24
+  password_min_length: 8
+  max_login_attempts: 5
+  session_timeout_minutes: 30
+  enable_cors: true
+  allowed_origins:
+  - http://localhost:3000
+logging:
+  level: INFO
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  file_path: null
+  max_file_size_mb: 100
+  backup_count: 5
+  enable_console: true
+  enable_file: false
+pms:
+  project_root: .
+  memory_dir: memory
+  backup_dir: backups
+  max_backups: 10
+  enable_integrity_checks: true
+  enable_transactions: true
+  auto_commit: false
+  validation_on_load: true
+das:
+  agents_dir: agents
+  audit_log_file: memory/das_audit.log
+  enable_enforcement: true
+  enable_audit_logging: true
+  max_concurrent_agents: 10
+  agent_timeout_seconds: 300
+  permission_cache_ttl_minutes: 60
+events:
+  max_concurrent_events: 100
+  event_history_size: 1000
+  enable_persistence: false
+  event_log_file: null
+  subscriber_timeout_seconds: 30
+  enable_global_error_handler: true
+web:
+  host: localhost
+  port: 3000
+  debug: false
+  enable_hot_reload: false
+  api_base_url: /api
+  static_files_dir: static
+  template_dir: templates
+cli:
+  default_project_type: default
+  template_dir: docs/doc_templates
+  enable_colors: true
+  confirm_destructive_actions: true
+  max_validation_errors: 50
+  default_output_format: table
+config_version: 1.0.0
+loaded_at: '2025-08-12T12:08:15.804901'
+loaded_from: null

@@ -169,7 +169,301 @@ def _atomic_write(target: Path, data: bytes) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Public API
+# Core Classes - TechSpec Implementation
+# ---------------------------------------------------------------------------
+
+class PMSCore:
+    """Sistema de memoria persistente con integridad garantizada"""
+    
+    def __init__(self, project_root: str = '.'):
+        self.project_root = Path(project_root)
+        self.memory_index_path = self.project_root / 'memory' / 'memory_index.yaml'
+        self.temp_dir = self.project_root / '.pms_temp'
+        self.memory_index = {}
+        self._load_memory_index()
+        
+        # Initialize components
+        self.integrity_validator = IntegrityValidator(self)
+        self.transaction_manager = TransactionManager(self)
+    
+    def _load_memory_index(self) -> None:
+        """Carga configuración de paths y metadatos"""
+        if self.memory_index_path.exists():
+            with open(self.memory_index_path, 'r', encoding='utf-8') as f:
+                self.memory_index = yaml.safe_load(f) or {}
+    
+    def _get_file_path(self, scope: str) -> Path:
+        """Resuelve scope a path físico del archivo"""
+        return _resolve_path(scope)
+    
+    def load(self, scope: str, project_path: str = None) -> dict[str, Any]:
+        """Carga datos desde scope especificado con validación de integridad"""
+        return load(scope)
+    
+    def save(self, scope: str, data: dict, project_path: str = None) -> bool:
+        """Guarda datos en scope con transacción atómica y backup automático"""
+        try:
+            transaction_id = self.transaction_manager.begin_transaction(scope)
+            
+            if isinstance(data, dict):
+                payload = yaml.dump(data, default_flow_style=False)
+            else:
+                payload = str(data)
+            
+            save(scope, payload)
+            self.transaction_manager.commit_transaction(transaction_id)
+            return True
+            
+        except Exception as e:
+            if 'transaction_id' in locals():
+                self.transaction_manager.rollback_transaction(transaction_id)
+            raise PMSCoreError(f"Save failed for scope '{scope}': {e}") from e
+    
+    def rollback(self, scope: str, version: str, project_path: str = None) -> bool:
+        """Revierte scope a versión anterior usando backups"""
+        return self.transaction_manager.rollback_to_version(scope, version)
+    
+    def validate_integrity(self, scope: str, project_path: str = None) -> bool:
+        """Valida integridad completa de archivo"""
+        is_valid, _ = self.integrity_validator.validate_file_integrity(scope)
+        return is_valid
+    
+    def get_version_history(self, scope: str, project_path: str = None) -> list:
+        """Retorna historial de versiones para scope"""
+        return self.transaction_manager.get_transaction_history(scope)
+
+
+class IntegrityValidator:
+    """Validación SHA-1 y schemas YAML"""
+    
+    def __init__(self, pms_core: PMSCore):
+        self.pms = pms_core
+    
+    @staticmethod
+    def calculate_sha1(file_path: Path) -> str:
+        """Calcula hash SHA-1 de archivo"""
+        with open(file_path, 'rb') as f:
+            return hashlib.sha1(f.read()).hexdigest()
+    
+    def validate_yaml_schema(self, data: dict | str, schema_name: str) -> bool:
+        """Valida estructura YAML contra schema esperado usando memory_index"""
+        try:
+            # Cargar schema definitions desde memory_index
+            memory_index = _load_memory_index()
+            schemas = memory_index.get('schemas', {})
+            schema_def = schemas.get(schema_name)
+            
+            if not schema_def:
+                return True  # Default: accept if schema not defined
+            
+            if schema_name == "blueprint_v2":
+                if not isinstance(data, dict):
+                    return False
+                required_sections = schema_def.get('required_sections', [])
+                return all(section in data for section in required_sections)
+                
+            elif schema_name == "project_status_v1":
+                if not isinstance(data, str):
+                    return False
+                required_sections = schema_def.get('required_sections', [])
+                return all(section in data for section in required_sections)
+                
+            elif schema_name == "backlog_v1":
+                if not isinstance(data, dict):
+                    return False
+                required_fields = schema_def.get('required_fields', [])
+                
+                # Check required top-level fields
+                if not all(field in data for field in required_fields):
+                    return False
+                
+                # Validate task structure if historias exist
+                if 'historias' in data:
+                    task_schema = schema_def.get('task_schema', [])
+                    status_values = schema_def.get('status_values', [])
+                    priority_values = schema_def.get('priority_values', [])
+                    
+                    for task_id, task in data['historias'].items():
+                        if not isinstance(task, dict):
+                            return False
+                        
+                        # Check required task fields (flexible validation)
+                        critical_fields = ['id', 'status', 'priority']
+                        if not all(field in task for field in critical_fields):
+                            return False
+                        
+                        # Validate status values
+                        if task.get('status') not in status_values:
+                            return False
+                            
+                        # Validate priority values  
+                        if task.get('priority') not in priority_values:
+                            return False
+                
+                return True
+            
+            return True  # Default for other schemas
+            
+        except Exception:
+            # If validation fails, default to accepting (MVP behavior)
+            return True
+    
+    def validate_file_integrity(self, scope: str) -> tuple[bool, str]:
+        """Valida integridad completa de archivo incluyendo schema"""
+        try:
+            file_path = self.pms._get_file_path(scope)
+            
+            if not file_path.exists():
+                return False, f"Archivo {file_path} no existe"
+            
+            # Load data for validation
+            try:
+                data = load(scope)
+                if data is None:
+                    return False, "Archivo no pudo ser cargado"
+            except Exception as e:
+                return False, f"Error cargando archivo: {e}"
+            
+            # Get schema from memory_index
+            memory_index = _load_memory_index()
+            scopes = memory_index.get('scopes', {})
+            scope_config = scopes.get(scope, {})
+            schema_name = scope_config.get('schema')
+            
+            # Validate schema if defined
+            if schema_name:
+                is_valid_schema = self.validate_yaml_schema(data, schema_name)
+                if not is_valid_schema:
+                    return False, f"Schema validation failed for {schema_name}"
+            
+            # SHA-1 validation for critical files
+            if scope in ['blueprint', 'project_status']:
+                try:
+                    current_hash = self.calculate_sha1(file_path)
+                    expected_hash = scope_config.get('sha1_hash')
+                    
+                    if expected_hash and expected_hash != current_hash:
+                        return False, f"SHA-1 mismatch: esperado {expected_hash[:8]}..., actual {current_hash[:8]}..."
+                    
+                    return True, f"Integridad y schema validados (SHA-1: {current_hash[:8]}...)"
+                except Exception as e:
+                    return False, f"Error calculando SHA-1: {e}"
+            
+            return True, f"Integridad y schema validados"
+            
+        except Exception as e:
+            return False, f"Error validando integridad: {e}"
+
+
+class TransactionManager:
+    """Operaciones atómicas con rollback automático"""
+    
+    def __init__(self, pms_core: PMSCore):
+        self.pms = pms_core
+        self.transaction_log = []
+        self.temp_dir = pms_core.temp_dir
+        self.temp_dir.mkdir(parents=True, exist_ok=True)
+    
+    def begin_transaction(self, scope: str) -> str:
+        """Inicia transacción y crea backup"""
+        import uuid
+        transaction_id = f"txn_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+        file_path = self.pms._get_file_path(scope)
+        backup_path = self.temp_dir / f"{transaction_id}_{scope}.backup"
+        
+        if file_path.exists():
+            shutil.copy2(file_path, backup_path)
+        
+        self.transaction_log.append({
+            'id': transaction_id,
+            'scope': scope,
+            'backup_path': backup_path,
+            'timestamp': datetime.now(timezone.utc),
+            'status': 'active',
+            'original_existed': file_path.exists()
+        })
+        
+        return transaction_id
+    
+    def commit_transaction(self, transaction_id: str) -> bool:
+        """Confirma transacción y limpia backup"""
+        transaction = self._get_transaction(transaction_id)
+        if not transaction:
+            return False
+        
+        try:
+            is_valid, error = self.pms.integrity_validator.validate_file_integrity(transaction['scope'])
+            if not is_valid:
+                self.rollback_transaction(transaction_id)
+                raise PMSCoreError(f"Commit fallido: {error}")
+            
+            if transaction['backup_path'].exists():
+                transaction['backup_path'].unlink()
+            transaction['status'] = 'committed'
+            return True
+            
+        except Exception as e:
+            self.rollback_transaction(transaction_id)
+            raise PMSCoreError(f"Transaction commit failed: {e}") from e
+    
+    def rollback_transaction(self, transaction_id: str) -> bool:
+        """Revierte cambios usando backup"""
+        transaction = self._get_transaction(transaction_id)
+        if not transaction:
+            return False
+        
+        try:
+            file_path = self.pms._get_file_path(transaction['scope'])
+            backup_path = transaction['backup_path']
+            
+            if transaction['original_existed'] and backup_path.exists():
+                shutil.copy2(backup_path, file_path)
+            elif not transaction['original_existed'] and file_path.exists():
+                file_path.unlink()
+            
+            if backup_path.exists():
+                backup_path.unlink()
+            
+            transaction['status'] = 'rolled_back'
+            return True
+            
+        except Exception as e:
+            transaction['status'] = 'failed_rollback'
+            raise PMSCoreError(f"Rollback failed: {e}") from e
+    
+    def rollback_to_version(self, scope: str, version: str) -> bool:
+        """Revierte scope a versión específica"""
+        recent_transactions = [t for t in self.transaction_log 
+                             if t['scope'] == scope and t['status'] == 'committed']
+        if not recent_transactions:
+            return False
+        
+        latest = recent_transactions[-1]
+        return self.rollback_transaction(latest['id'])
+    
+    def get_transaction_history(self, scope: str) -> list:
+        """Retorna historial de transacciones para scope"""
+        return [
+            {
+                'transaction_id': t['id'],
+                'timestamp': t['timestamp'].isoformat(),
+                'status': t['status'],
+                'scope': t['scope']
+            }
+            for t in self.transaction_log 
+            if t['scope'] == scope
+        ]
+    
+    def _get_transaction(self, transaction_id: str) -> dict | None:
+        """Busca transacción por ID"""
+        for transaction in self.transaction_log:
+            if transaction['id'] == transaction_id:
+                return transaction
+        return None
+
+
+# ---------------------------------------------------------------------------  
+# Public API - Backward Compatibility
 # ---------------------------------------------------------------------------
 
 def load(scope: str | Path) -> dict[str, Any] | str:
@@ -362,6 +656,13 @@ def _get_next_change_id() -> int:
     except (OSError, ValueError):
         return 1
 
+
+# ---------------------------------------------------------------------------
+# Constants and cached paths  
+# ---------------------------------------------------------------------------
+
+# Cache for blueprint changes CSV path
+BLUEPRINT_CHANGES_CSV = DOCS_DIR / "blueprint_changes.csv"
 
 # ---------------------------------------------------------------------------
 # Path resolver

@@ -1,0 +1,67 @@
+fase: 0
+historias:
+  SETUP-001:
+    blocked_by: ''
+    created_at: '{{ project.created_at.isoformat() }}'
+    dependencies: []
+    description: Inicializar estructura de proyecto {{ project.name }} con directorios base y archivos de configuración
+    id: SETUP-001
+    notes:
+      devagent_observations: 'Proyecto generado desde template DevHub'
+      last_failure_reason: ''
+      manual_comments: 'Estructura inicial creada automáticamente'
+    phase: F0
+    priority: P0
+    status: done
+    title: Inicialización del proyecto {{ project.display_name }}
+    updated_at: '{{ project.created_at.isoformat() }}'
+  
+  SETUP-002:
+    blocked_by: ''
+    created_at: '{{ project.created_at.isoformat() }}'
+    dependencies: ['SETUP-001']
+    description: Configurar sistema PMS básico con memory_index.yaml y estructura de persistencia
+    id: SETUP-002
+    notes:
+      devagent_observations: 'PMS base configurado desde template'
+      last_failure_reason: ''
+      manual_comments: 'Revisar y customizar configuración según necesidades específicas'
+    phase: F0
+    priority: P0
+    status: todo
+    title: Configuración PMS básica
+    updated_at: '{{ project.created_at.isoformat() }}'
+  
+  SETUP-003:
+    blocked_by: ''
+    created_at: '{{ project.created_at.isoformat() }}'
+    dependencies: ['SETUP-001']
+    description: Configurar agentes básicos (DevAgent) con permisos y configuraciones iniciales
+    id: SETUP-003
+    notes:
+      devagent_observations: 'Configuración de agentes desde template'
+      last_failure_reason: ''
+      manual_comments: 'Ajustar permisos según requerimientos del proyecto'
+    phase: F0
+    priority: P0
+    status: todo
+    title: Configuración de agentes básicos
+    updated_at: '{{ project.created_at.isoformat() }}'
+    
+  PLAN-001:
+    blocked_by: ''
+    created_at: '{{ project.created_at.isoformat() }}'
+    dependencies: ['SETUP-002', 'SETUP-003']
+    description: Definir tareas específicas de desarrollo para Phase 1 en backlog_f1.yaml
+    id: PLAN-001
+    notes:
+      devagent_observations: 'Backlog Phase 1 debe ser definido según objetivos específicos'
+      last_failure_reason: ''
+      manual_comments: 'Crear backlog_f1.yaml con tareas de desarrollo específicas del proyecto'
+    phase: F0
+    priority: P1
+    status: todo
+    title: Planificación Phase 1 - Definir backlog de desarrollo
+    updated_at: '{{ project.created_at.isoformat() }}'
+
+sprint: 0

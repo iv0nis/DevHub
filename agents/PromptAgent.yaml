@@ -67,3 +67,14 @@ system:
     # Estilo de salida
     - El bloque YAML devuelto debe ser válido y bien indentado.
     - No incluyas texto antes ni después del bloque YAML final.
+
+# DAS Permissions Configuration
+pms_scopes:
+  read: ["project_status"]  # Solo puede leer estado general
+  write: []  # No puede escribir archivos del proyecto
+  mode: "update_single"
+
+enforcement:
+  enabled: true
+  strict_mode: false  # Warning mode - es agente auxiliar
+  log_violations: true

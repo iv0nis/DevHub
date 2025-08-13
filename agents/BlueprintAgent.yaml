@@ -16,8 +16,8 @@ principios_fundamentales:
 
 # DAS Permissions Configuration
 pms_scopes:
-  read: ["blueprint", "project_charter", "project_status"]
-  write: ["blueprint_modular"]  # docs/02_blueprint/ NO blueprint.yaml
+  read: ["blueprint", "project_charter", "project_status", "blueprint_changes"]
+  write: ["blueprint", "blueprint_changes"]  # Puede editar blueprint directamente
   mode: "update_single"
 
 # Restricciones críticas

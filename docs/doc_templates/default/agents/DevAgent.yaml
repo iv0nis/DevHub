@@ -1,0 +1,220 @@
+# DevAgent Configuration for {{ project.name }}
+# Generated: {{ project.created_at.strftime('%Y-%m-%d') }}
+# Template Version: {{ custom.devhub_version }}
+
+name: "DevAgent"
+display_name: "Development Agent"
+description: "Automated development agent for {{ project.display_name }}"
+version: "1.0.0"
+
+# Agent configuration
+config:
+  # Core settings
+  enabled: true
+  auto_start: false
+  max_concurrent_tasks: 3
+  task_timeout: 1800  # 30 minutes
+  
+  # Behavioral settings
+  strict_mode: true
+  verbose_logging: true
+  error_recovery: true
+  
+  # Development specific
+  code_style: "pep8"
+  test_framework: "pytest"
+  documentation_format: "markdown"
+  
+  # Project customization
+  project_name: "{{ project.name }}"
+  project_type: "devhub"
+  development_phase: "f0"  # Will be updated as project progresses
+
+# Permission system
+permissions:
+  # Read permissions - what the agent can access
+  read_scopes:
+    - "memory_index"          # Core memory mapping
+    - "backlog_f*"             # All backlog phases (wildcard)
+    - "blueprint"              # Architecture documentation (read-only)
+    - "project_status"         # Project status and metrics
+    - "techspecs"              # Technical specifications
+    - "project_charter"        # Project charter (read-only)
+    - "roadmap"                # Project roadmap (read-only)
+    
+  # Write permissions - what the agent can modify
+  write_scopes:
+    - "backlog_f*"             # Can update all backlog phases
+    - "project_status"         # Can update project metrics
+    - "blueprint_changes"      # Can propose blueprint changes
+    - "techspecs"              # Can create/update technical specs
+    - "agent_reports"          # Can write development reports
+    
+  # Special permissions
+  restricted_scopes:
+    - "blueprint"              # Cannot directly modify blueprint
+    - "project_charter"        # Cannot modify project charter
+    - "roadmap"                # Cannot modify roadmap
+    - "memory_index"           # Cannot modify core memory index
+
+# Enforcement settings
+enforcement:
+  enabled: true
+  strict_mode: true
+  log_violations: true
+  
+  # Validation rules
+  validation:
+    require_dependencies: true
+    validate_task_status: true
+    enforce_priority_order: false  # Allow flexible task selection
+    require_documentation: true
+    
+  # Audit settings
+  audit:
+    log_all_operations: true
+    log_file: "memory/das_audit.log"
+    retention_days: 30
+    include_stack_traces: true
+
+# Task execution preferences
+task_execution:
+  # Priority handling
+  priority_order: ["P0", "P1", "P2", "P3"]
+  auto_select_tasks: true
+  respect_dependencies: true
+  
+  # Work patterns
+  preferred_work_blocks: 2  # Prefer working on 2-3 related tasks
+  context_switching_penalty: 0.2
+  
+  # Quality gates
+  require_testing: true
+  require_documentation_update: true
+  validate_before_completion: true
+
+# Integration settings
+integrations:
+  # PMS integration
+  pms:
+    enabled: true
+    mode: "update_dual"        # Default save mode
+    integrity_validation: true
+    
+  # Event system integration
+  events:
+    enabled: true
+    publish_task_events: true
+    subscribe_to_system_events: true
+    
+  # CLI integration
+  cli:
+    enabled: true
+    command_prefix: "devhub"
+    interactive_mode: false
+    
+  # Template system
+  templates:
+    enabled: true
+    auto_generate_docs: true
+    update_existing_templates: false
+
+# Reporting and monitoring
+reporting:
+  # Progress reporting
+  auto_status_updates: true
+  status_update_frequency: "after_task"  # Options: continuous, after_task, daily
+  
+  # Metrics collection
+  collect_metrics: true
+  metrics_categories:
+    - "task_completion_time"
+    - "error_rates"
+    - "dependency_resolution"
+    - "quality_metrics"
+    
+  # Report generation
+  generate_reports: true
+  report_formats: ["markdown", "json"]
+  report_schedule: "weekly"
+
+# Development workflow customization
+workflow:
+  # Phase management
+  auto_phase_transition: false  # Require manual phase transitions
+  phase_completion_threshold: 95  # Percentage of P0/P1 tasks completed
+  
+  # Code quality
+  run_linting: true
+  run_type_checking: true
+  run_security_checks: false  # Set to true if security scanning needed
+  
+  # Testing requirements
+  run_unit_tests: true
+  run_integration_tests: false  # Enable when test suite is available
+  minimum_test_coverage: 80
+  
+  # Documentation requirements
+  update_techspecs: true
+  update_architecture_docs: false  # DevAgent cannot directly update blueprint
+  maintain_changelog: true
+
+# Agent learning and adaptation
+adaptation:
+  # Learning from project patterns
+  learn_from_failures: true
+  adapt_task_selection: true
+  optimize_work_patterns: true
+  
+  # Feedback integration
+  accept_manual_feedback: true
+  adjust_priorities_based_on_feedback: true
+  
+  # Continuous improvement
+  self_evaluation: true
+  performance_tracking: true
+  suggest_process_improvements: true
+
+# Project-specific customizations
+customizations:
+  # Technology stack awareness
+  technologies:
+    primary_language: "python"
+    frameworks: ["click", "jinja2", "pytest"]
+    tools: ["git", "yaml", "markdown"]
+    
+  # Domain knowledge
+  domain_focus: "devhub_development"
+  architecture_patterns: ["three_pillar", "event_driven", "agent_based"]
+  
+  # Communication preferences
+  communication_style: "concise"      # Options: verbose, concise, minimal
+  technical_depth: "detailed"         # Options: overview, detailed, expert
+  
+  # Project context
+  created_from_template: true
+  template_name: "default"
+  template_version: "{{ custom.devhub_version }}"
+  project_author: "{{ project.author }}"
+  project_description: "{{ project.description }}"
+
+# Metadata
+metadata:
+  created_at: "{{ project.created_at.isoformat() }}"
+  last_updated: "{{ project.created_at.isoformat() }}"
+  config_version: "1.0.0"
+  generated_by: "DevHub Template System"
+  
+  # Validation checksums (will be populated by system)
+  validation_hash: null
+  last_validation: null
+  
+  # Agent lifecycle
+  activation_count: 0
+  total_tasks_completed: 0
+  last_active: null
+  
+  # Performance metrics
+  average_task_time: null
+  success_rate: null
+  error_recovery_rate: null

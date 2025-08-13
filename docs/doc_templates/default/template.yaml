@@ -1,0 +1,51 @@
+name: default
+display_name: "Default DevHub Project"
+description: "Complete DevHub project with PMS, DAS, CLI, and documentation structure"
+version: "1.0.0"
+
+# Directories to create in new project
+directories:
+  - "docs/01_ProjectCharter"
+  - "docs/02_blueprint"
+  - "docs/03_TechSpecs" 
+  - "docs/04_Roadmap"
+  - "docs/05_backlog"
+  - "docs/doc_templates"
+  - "memory"
+  - "pms"
+  - "das"
+  - "agents"
+  - "core"
+  - "tests"
+  - "config"
+  - "logs"
+  - ".github/workflows"
+
+# Template files to process
+files:
+  - "README.md"
+  - "docs/01_ProjectCharter/project_charter.md"
+  - "docs/02_blueprint/blueprint.md"
+  - "docs/05_backlog/backlog_f0.yaml"
+  - "memory/memory_index.yaml"
+  - "memory/project_status.md"
+  - "pms/pms_core.py"
+  - "agents/DevAgent.yaml"
+  - "config/development.yaml"
+  - "config/production.yaml"
+  - ".gitignore"
+  - ".github/workflows/ci.yml"
+
+# Post-creation hooks
+hooks:
+  git_init: "git init"
+  initial_commit: "git add . && git commit -m 'Initial DevHub project setup'"
+
+# Template variables with defaults
+variables:
+  project_name: "{{ project.name }}"
+  project_description: "{{ project.description or 'DevHub project' }}"
+  author_name: "{{ project.author or 'DevHub User' }}"
+  author_email: "{{ project.email or 'user@example.com' }}"
+  python_version: "3.8+"
+  devhub_version: "1.0.0"

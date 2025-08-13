@@ -26,17 +26,38 @@ from pathlib import Path
 from typing import Dict, List, Literal, Any, Optional
 import os
 import fnmatch
+import json
+import traceback
+import time
+import uuid
+from datetime import datetime, timezone
 
 # Configure logging for violation tracking
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("das.enforcer")
 
 # ---------------------------------------------------------------------------
-# Core Classes
+# Core Classes - TechSpec TS-DAS-001 Implementation
 # ---------------------------------------------------------------------------
 
-class PermissionError(Exception):
-    """Raised when agent attempts unauthorized operation"""
+class DASError(Exception):
+    """Base exception para DAS Enforcer operations"""
+    pass
+
+class PermissionError(DASError):
+    """Agente no tiene permisos para operación solicitada"""
+    def __init__(self, agent_name: str, scope: str, operation: str):
+        self.agent_name = agent_name
+        self.scope = scope
+        self.operation = operation
+        super().__init__(f"Permission denied: {agent_name} cannot {operation} {scope}")
+
+class AgentNotFoundError(DASError):
+    """Agente no configurado en el sistema"""
+    pass
+
+class EnforcementError(DASError):
+    """Error general en enforcement de políticas"""
     pass
 
 class DASEnforcer:
@@ -47,8 +68,14 @@ class DASEnforcer:
         self.agents_dir = Path(agents_dir)
         self.project_root = Path(project_root) if project_root else Path.cwd()
         self.permissions_cache = {}
+        self.audit_log = []
         self._ensure_agents_dir()
         self._init_protected_paths()
+        
+        # Initialize TechSpec components
+        self.permission_validator = PermissionValidator(self)
+        self.filesystem_protector = FilesystemProtector(self)
+        self.audit_logger = AuditLogger(self)
     
     def _ensure_agents_dir(self):
         """Validate agents directory exists"""
@@ -60,18 +87,33 @@ class DASEnforcer:
         self.protected_paths = {
             'blueprint': [
                 'docs/02_blueprint/**/*',
-                'docs/blueprint.md'  # Legacy single file
+                'docs/blueprint.yaml',
+                'docs/blueprint.md'
             ],
             'project_charter': [
                 'docs/01_ProjectCharter/**/*',
-                'ProjectCharter.md'  # Legacy single file
+                'docs/ProjectCharter.md'
             ],
-            'roadmap': [
-                'docs/03_roadmap/**/*',
-                'roadmap.md'  # Legacy single file
+            'project_status': [
+                'memory/project_status.md'
             ],
             'backlog_f*': [
-                'docs/04_backlog/backlog_f*.yaml'
+                'docs/05_backlog/backlog_f*.yaml'
+            ],
+            'backlog_f0': [
+                'docs/05_backlog/backlog_f0.yaml'
+            ],
+            'backlog_f1': [
+                'docs/05_backlog/backlog_f1.yaml'
+            ],
+            'backlog_f2': [
+                'docs/05_backlog/backlog_f2.yaml'
+            ],
+            'blueprint_changes': [
+                'docs/blueprint_changes.csv'
+            ],
+            'techspecs': [
+                'docs/03_TechSpecs/**/*.md'
             ]
         }
     
@@ -273,6 +315,167 @@ class DASEnforcer:
         """Log permission violation for audit trail"""
         logger.warning(f"PERMISSION_VIOLATION: {agent_id} tried {operation} on '{scope}' - {message}")
 
+
+class PermissionValidator:
+    """Validación granular de permisos por agente y scope"""
+    
+    def __init__(self, enforcer: DASEnforcer):
+        self.enforcer = enforcer
+    
+    def validate_read_permission(self, agent_name: str, scope: str) -> tuple[bool, str]:
+        """Valida si agente puede leer scope específico"""
+        try:
+            agent_config = self.enforcer.load_agent_permissions(agent_name)
+        except ValueError:
+            return False, f"Agente '{agent_name}' no configurado"
+        
+        read_scopes = agent_config.get('read_scopes', [])
+        write_scopes = agent_config.get('write_scopes', [])  # Write implies read
+        allowed_scopes = read_scopes + write_scopes
+        
+        # Soporte para wildcards (backlog_f*)
+        for allowed_scope in allowed_scopes:
+            if self.enforcer._scope_matches(scope, allowed_scope):
+                return True, f"Permiso {'wildcard' if '*' in allowed_scope else 'directo'} concedido"
+        
+        return False, f"Agente '{agent_name}' no tiene permiso read para '{scope}'"
+    
+    def validate_write_permission(self, agent_name: str, scope: str) -> tuple[bool, str]:
+        """Valida si agente puede escribir scope específico"""
+        try:
+            agent_config = self.enforcer.load_agent_permissions(agent_name)
+        except ValueError:
+            return False, f"Agente '{agent_name}' no configurado"
+        
+        write_scopes = agent_config.get('write_scopes', [])
+        
+        # Validación similar a read con wildcards
+        for allowed_scope in write_scopes:
+            if self.enforcer._scope_matches(scope, allowed_scope):
+                return True, f"Permiso write {'wildcard' if '*' in allowed_scope else 'directo'} concedido"
+        
+        return False, f"Agente '{agent_name}' no tiene permiso write para '{scope}'"
+    
+    def get_agent_permissions(self, agent_name: str) -> dict:
+        """Retorna configuración completa de permisos para agente"""
+        try:
+            agent_config = self.enforcer.load_agent_permissions(agent_name)
+            return {
+                'read_scopes': agent_config.get('read_scopes', []),
+                'write_scopes': agent_config.get('write_scopes', []),
+                'mode': agent_config.get('mode', 'update_single'),
+                'enforcement_enabled': agent_config.get('enforcement_enabled', False),
+                'strict_mode': agent_config.get('strict_mode', False),
+                'log_violations': agent_config.get('log_violations', True)
+            }
+        except ValueError:
+            return {}
+
+
+class FilesystemProtector:
+    """Protección a nivel de filesystem usando patterns de paths"""
+    
+    def __init__(self, enforcer: DASEnforcer):
+        self.enforcer = enforcer
+    
+    def validate_file_access(self, agent_name: str, file_path: str, operation: str) -> tuple[bool, str]:
+        """Valida acceso a path específico del filesystem"""
+        file_path_obj = Path(file_path)
+        
+        # Determinar scope basado en path
+        scope = self._path_to_scope(file_path_obj)
+        if not scope:
+            return True, f"Path '{file_path}' no está protegido por DAS"
+        
+        # Validar permisos del agente para el scope
+        if operation.lower() == 'read':
+            return self.enforcer.permission_validator.validate_read_permission(agent_name, scope)
+        elif operation.lower() == 'write':
+            return self.enforcer.permission_validator.validate_write_permission(agent_name, scope)
+        else:
+            return False, f"Operación '{operation}' no reconocida"
+    
+    def _path_to_scope(self, file_path: Path) -> str | None:
+        """Mapea path de archivo a scope correspondiente"""
+        file_path_str = str(file_path).replace('\\', '/')
+        
+        # Check against protected paths patterns
+        for scope, path_patterns in self.enforcer.protected_paths.items():
+            for pattern in path_patterns:
+                # Handle wildcard patterns
+                if '**' in pattern:
+                    base_pattern = pattern.replace('/**/*', '')
+                    if file_path_str.startswith(base_pattern):
+                        return scope
+                elif '*' in pattern:
+                    if fnmatch.fnmatch(file_path_str, pattern):
+                        return scope
+                elif file_path_str.endswith(pattern) or pattern in file_path_str:
+                    return scope
+        
+        return None
+    
+    def is_protected_path(self, file_path: str) -> bool:
+        """Verifica si path está bajo protección DAS"""
+        return self._path_to_scope(Path(file_path)) is not None
+
+
+class AuditLogger:
+    """Sistema de auditoría completo para compliance y debugging"""
+    
+    def __init__(self, enforcer: DASEnforcer):
+        self.enforcer = enforcer
+        self.log_file = enforcer.project_root / 'memory' / 'das_audit.log'
+        self.session_id = f"session_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+        
+        # Ensure log directory exists
+        self.log_file.parent.mkdir(parents=True, exist_ok=True)
+    
+    def log_access_attempt(self, agent_name: str, scope: str, operation: str, 
+                          success: bool, details: str = "") -> None:
+        """Log completo de intento de acceso"""
+        log_entry = {
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'session_id': self.session_id,
+            'agent_name': agent_name,
+            'scope': scope,
+            'operation': operation,
+            'success': success,
+            'details': details,
+            'stack_trace': traceback.format_stack() if not success else None
+        }
+        
+        # Append al log file
+        try:
+            with open(self.log_file, 'a', encoding='utf-8') as f:
+                f.write(f"{json.dumps(log_entry)}\n")
+        except Exception as e:
+            logger.error(f"Failed to write audit log: {e}")
+        
+        # Mantener en memoria para queries rápidas
+        self.enforcer.audit_log.append(log_entry)
+        
+        # Limpiar log en memoria si crece mucho
+        if len(self.enforcer.audit_log) > 1000:
+            self.enforcer.audit_log = self.enforcer.audit_log[-500:]
+    
+    def get_violation_summary(self) -> dict:
+        """Resumen de violaciones para alertas"""
+        violations = [entry for entry in self.enforcer.audit_log if not entry['success']]
+        
+        return {
+            'total_violations': len(violations),
+            'agents_with_violations': list(set(v['agent_name'] for v in violations)),
+            'most_violated_scopes': self._count_violations_by_scope(violations),
+            'recent_violations': violations[-10:] if violations else []
+        }
+    
+    def _count_violations_by_scope(self, violations: list) -> dict:
+        """Cuenta violaciones por scope para identificar problemas"""
+        from collections import Counter
+        scope_counts = Counter(v['scope'] for v in violations)
+        return dict(scope_counts.most_common(5))
+
 # ---------------------------------------------------------------------------
 # Global instance and public API
 # ---------------------------------------------------------------------------
@@ -331,11 +534,14 @@ def safe_pms_call(
         
         violation_msg = f"Agent '{agent_id}' denied {operation} access to scope '{scope}'"
         
+        # Log via audit system
+        enforcer.audit_logger.log_access_attempt(agent_id, scope, operation, False, violation_msg)
+        
         if log_violations:
             enforcer.log_violation(agent_id, operation, scope, violation_msg)
         
         if strict_mode:
-            raise PermissionError(violation_msg)
+            raise PermissionError(agent_id, scope, operation)
         else:
             logger.warning(f"PERMISSION_WARNING: {violation_msg} (continuing in non-strict mode)")
     
@@ -349,7 +555,10 @@ def safe_pms_call(
         import pms_core
         
         if operation == "load":
-            return pms_core.load(scope=scope)
+            result = pms_core.load(scope=scope)
+            # Log successful operation
+            enforcer.audit_logger.log_access_attempt(agent_id, scope, operation, True, "Load successful")
+            return result
         
         elif operation == "save":
             if payload is None:
@@ -360,13 +569,22 @@ def safe_pms_call(
                 agent_config = enforcer.load_agent_permissions(agent_id)
                 mode = agent_config.get('mode', 'update_single')
             
-            return pms_core.save(scope=scope, payload=payload, mode=mode)
+            result = pms_core.save(scope=scope, payload=payload, mode=mode)
+            # Log successful operation
+            enforcer.audit_logger.log_access_attempt(agent_id, scope, operation, True, f"Save successful (mode: {mode})")
+            return result
         
         else:
             raise ValueError(f"Unsupported operation: {operation}")
             
     except ImportError as e:
+        # Log the error
+        enforcer.audit_logger.log_access_attempt(agent_id, scope, operation, False, f"Import error: {e}")
         raise RuntimeError(f"Failed to import pms_core: {e}")
+    except Exception as e:
+        # Log any other errors during operation
+        enforcer.audit_logger.log_access_attempt(agent_id, scope, operation, False, f"Operation failed: {e}")
+        raise
 
 # ---------------------------------------------------------------------------
 # Convenience functions for agents
@@ -408,6 +626,155 @@ def agent_save(
         PermissionError: If agent lacks write permission for scope
     """
     return safe_pms_call(agent_id, "save", scope, payload, mode)
+
+# ---------------------------------------------------------------------------
+# Advanced Permission Management - TS-DAS-002 Implementation
+# ---------------------------------------------------------------------------
+
+def reload_agent_configs() -> None:
+    """Force reload of all agent configurations"""
+    enforcer = get_enforcer()
+    enforcer.permissions_cache.clear()
+    logger.info("Agent configurations cache cleared - will reload on next access")
+
+def list_all_agents() -> List[str]:
+    """List all available agent configurations"""
+    enforcer = get_enforcer()
+    agent_files = list(enforcer.agents_dir.glob("*.yaml"))
+    return [agent_file.stem for agent_file in agent_files]
+
+def get_agent_permissions_summary() -> Dict[str, Dict[str, Any]]:
+    """Get comprehensive summary of all agent permissions"""
+    summary = {}
+    
+    for agent_name in list_all_agents():
+        try:
+            permissions = validate_agent_config(agent_name)
+            summary[agent_name] = permissions
+        except Exception as e:
+            summary[agent_name] = {"error": str(e)}
+    
+    return summary
+
+def validate_scope_access(agent_name: str, scope: str, operation: str) -> Dict[str, Any]:
+    """Detailed validation of scope access with explanation"""
+    enforcer = get_enforcer()
+    
+    try:
+        # Get agent permissions
+        permissions = enforcer.load_agent_permissions(agent_name)
+        
+        # Determine allowed scopes
+        if operation == "load":
+            allowed_scopes = permissions['read_scopes'] + permissions['write_scopes']
+        elif operation == "save":
+            allowed_scopes = permissions['write_scopes']
+        else:
+            return {
+                "allowed": False,
+                "reason": f"Invalid operation: {operation}",
+                "details": {}
+            }
+        
+        # Check exact match first
+        if scope in allowed_scopes:
+            return {
+                "allowed": True,
+                "reason": "Direct scope match",
+                "match_type": "exact",
+                "matched_pattern": scope,
+                "details": {
+                    "agent": agent_name,
+                    "scope": scope,
+                    "operation": operation,
+                    "enforcement_enabled": permissions['enforcement_enabled']
+                }
+            }
+        
+        # Check wildcard matches
+        for pattern in allowed_scopes:
+            if pattern.endswith('*') and enforcer._scope_matches(scope, pattern):
+                return {
+                    "allowed": True,
+                    "reason": "Wildcard pattern match",
+                    "match_type": "wildcard",
+                    "matched_pattern": pattern,
+                    "details": {
+                        "agent": agent_name,
+                        "scope": scope,
+                        "operation": operation,
+                        "enforcement_enabled": permissions['enforcement_enabled']
+                    }
+                }
+        
+        return {
+            "allowed": False,
+            "reason": f"No matching scope found for '{scope}'",
+            "details": {
+                "agent": agent_name,
+                "scope": scope,
+                "operation": operation,
+                "allowed_scopes": allowed_scopes,
+                "enforcement_enabled": permissions['enforcement_enabled']
+            }
+        }
+        
+    except ValueError as e:
+        return {
+            "allowed": False,
+            "reason": f"Agent not found: {e}",
+            "details": {}
+        }
+
+def audit_agent_activity(agent_name: str, limit: int = 10) -> List[Dict[str, Any]]:
+    """Get recent activity for specific agent from audit log"""
+    enforcer = get_enforcer()
+    
+    agent_activities = [
+        entry for entry in enforcer.audit_log 
+        if entry['agent_name'] == agent_name
+    ]
+    
+    # Sort by timestamp (most recent first) and limit
+    agent_activities.sort(key=lambda x: x['timestamp'], reverse=True)
+    return agent_activities[:limit]
+
+def get_permission_matrix() -> Dict[str, Dict[str, str]]:
+    """Generate permission matrix for all agents and scopes"""
+    agents = list_all_agents()
+    
+    # Get all unique scopes from memory_index
+    try:
+        import pms_core
+        memory_index = pms_core._load_memory_index()
+        scopes = list(memory_index.get('scopes', {}).keys())
+    except:
+        # Fallback to common scopes
+        scopes = ['blueprint', 'project_status', 'backlog_f1', 'backlog_f2', 'techspecs', 'blueprint_changes']
+    
+    matrix = {}
+    
+    for agent in agents:
+        matrix[agent] = {}
+        for scope in scopes:
+            try:
+                # Check read permission
+                can_read = test_permission(agent, 'load', scope)
+                can_write = test_permission(agent, 'save', scope)
+                
+                if can_read and can_write:
+                    matrix[agent][scope] = 'RW'
+                elif can_read:
+                    matrix[agent][scope] = 'R-'
+                elif can_write:
+                    matrix[agent][scope] = '-W'  # Unlikely but possible
+                else:
+                    matrix[agent][scope] = '--'
+                    
+            except Exception:
+                matrix[agent][scope] = 'ERR'
+    
+    return matrix
 
 # ---------------------------------------------------------------------------
 # Development and testing utilities

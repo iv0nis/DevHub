@@ -1,0 +1,152 @@
+# Memory Index for {{ project.name }}
+# Generated: {{ project.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+# DevHub Template System v{{ custom.devhub_version }}
+
+version: "1.0"
+project:
+  name: "{{ project.name }}"
+  display_name: "{{ project.display_name }}"
+  created: "{{ project.created_at.isoformat() }}"
+  template_source: "default"
+
+# Document paths and schemas
+documents:
+  # Project Management
+  project_charter:
+    path: "docs/01_ProjectCharter/project_charter.md"
+    schema: "project_charter_v1"
+    access_mode: "read_only"
+    
+  blueprint:
+    path: "docs/02_blueprint/blueprint.md"
+    schema: "blueprint_v2"
+    access_mode: "restricted_write"  # Only BluePrintAgent can write
+    
+  project_status:
+    path: "memory/project_status.md"
+    schema: "project_status_v1"
+    access_mode: "agent_managed"
+  
+  roadmap:
+    path: "docs/04_Roadmap/roadmap.md"
+    schema: "roadmap_v1"
+    access_mode: "read_only"
+    
+  # Backlogs per phase
+  backlog_f0:
+    path: "docs/05_backlog/backlog_f0.yaml"
+    schema: "backlog_v1"
+    access_mode: "agent_managed"
+    
+  backlog_f1:
+    path: "docs/05_backlog/backlog_f1.yaml"
+    schema: "backlog_v1"
+    access_mode: "agent_managed"
+    
+  # Technical Specifications  
+  techspecs:
+    path: "docs/03_TechSpecs/"
+    schema: "techspec_v1"
+    access_mode: "agent_managed"
+    pattern: "*.yaml"
+    
+  # Configuration
+  memory_index:
+    path: "memory/memory_index.yaml"
+    schema: "memory_index_v1"
+    access_mode: "system_managed"
+    
+  # Agent outputs
+  blueprint_changes:
+    path: "memory/blueprint_changes.csv"
+    schema: "blueprint_changes_v1"
+    access_mode: "agent_managed"
+    
+  agent_reports:
+    path: "memory/agent_reports/"
+    schema: "agent_report_v1"
+    access_mode: "agent_managed"
+    pattern: "*.md"
+
+# Schema definitions
+schemas:
+  blueprint_v2:
+    type: "markdown"
+    validation: "semantic"
+    required_sections: ["System Overview", "Architecture Components", "Agent Ecosystem"]
+    
+  project_status_v1:
+    type: "markdown"
+    validation: "structured"
+    required_sections: ["Current State", "Progress Metrics", "Next Actions"]
+    
+  backlog_v1:
+    type: "yaml"
+    validation: "schema"
+    required_fields: ["fase", "historias", "sprint"]
+    
+  techspec_v1:
+    type: "yaml"
+    validation: "schema"
+    required_fields: ["id", "component", "specification"]
+    
+  memory_index_v1:
+    type: "yaml"
+    validation: "schema"
+    required_fields: ["version", "documents", "schemas"]
+    
+  blueprint_changes_v1:
+    type: "csv"
+    validation: "format"
+    required_columns: ["timestamp", "agent", "change_type", "description"]
+    
+  agent_report_v1:
+    type: "markdown"
+    validation: "minimal"
+    required_sections: ["Summary", "Details"]
+
+# Agent configurations
+agents:
+  dev_agent:
+    path: "agents/DevAgent.yaml"
+    
+  blueprint_agent:
+    path: "agents/BluePrintAgent.yaml"
+    
+  qa_agent:
+    path: "agents/QAAgent.yaml"
+    
+  ai_project_manager:
+    path: "agents/AiProjectManager.yaml"
+
+# System configuration
+system:
+  pms_enabled: true
+  das_enabled: true
+  audit_logging: true
+  integrity_validation: true
+  
+  # Template system integration
+  template_engine: "jinja2"
+  template_version: "{{ custom.devhub_version }}"
+  
+  # Environment
+  default_environment: "development"
+  config_path: "config/"
+  
+  # Backup and versioning
+  backup_enabled: false
+  versioning_enabled: false
+  
+# Metadata
+metadata:
+  generated_by: "DevHub Template System"
+  template_version: "{{ custom.devhub_version }}"
+  creation_date: "{{ project.created_at.isoformat() }}"
+  last_updated: "{{ project.created_at.isoformat() }}"
+  format_version: "1.0"
+  
+  # Project specific
+  author: "{{ project.author }}"
+  project_version: "{{ project.version }}"
+  license: "{{ project.license }}"

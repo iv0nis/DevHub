@@ -1,52 +1,91 @@
-# DevHub Memory Index
+# Memory Index - Schema v1.0 según TechSpec TS-PMS-002
+project_name: "DevHub"
+version: "1.0"
+created: "2025-08-11T13:40:00Z"
+last_modified: "2025-08-11T13:40:00Z"
 
-# Specs
-specs:
-  das: "../das/das.md"  
-  pms: "../pms/pms.md"
+# Scopes principales para PMS Core
+scopes:
+  blueprint:
+    path: "docs/02_blueprint/blueprint.md"
+    type: "markdown"
+    sha1_hash: ""
+    schema: "blueprint_v2"
+    
+  project_status:
+    path: "memory/project_status.md"
+    type: "markdown"
+    schema: "project_status_v1"
+    
+  backlog_f1:
+    path: "docs/05_backlog/backlog_f1.yaml"
+    type: "yaml" 
+    schema: "backlog_v1"
+    
+  backlog_f2:
+    path: "docs/05_backlog/backlog_f2.yaml"
+    type: "yaml"
+    schema: "backlog_v1"
+  
+  backlog_f0:
+    path: "docs/05_backlog/backlog_f0.yaml"
+    type: "yaml"
+    schema: "backlog_v1"
+    
+  blueprint_changes:
+    path: "docs/blueprint_changes.csv"
+    type: "csv"
+    schema: "blueprint_changes_v1"
+    
+  techspecs:
+    path: "docs/03_TechSpecs/**/*.md"
+    type: "markdown"
+    schema: "techspec_v1"
 
-# Agentes
+# Schemas de validación según TechSpec
+schemas:
+  blueprint_v2:
+    required_sections: ["arquitectura", "componentes", "decisiones_arquitectonicas"]
+    version_format: "semantic"
+    integrity_check: true
+    
+  project_status_v1:
+    required_sections: ["current_state", "Current State", "Registro de Cambios"]
+    format: "markdown_with_yaml_header"
+    
+  backlog_v1:
+    required_fields: ["historias", "fase", "sprint"]
+    task_schema: ["id", "status", "priority", "description"]
+    status_values: ["todo", "in_progress", "done", "blocked"]
+    priority_values: ["P0", "P1", "P2", "P3"]
+    
+  blueprint_changes_v1:
+    required_fields: ["id", "author", "timestamp", "description", "status"]
+    format: "csv"
+    
+  techspec_v1:
+    required_sections: ["Introducción", "Diseño Detallado", "APIs y Contratos"]
+    format: "markdown"
+
+# Configuración legacy mantenida para compatibilidad
 agents:
   ai_project_manager: "../agents/AiProjectManager.yaml"
   blueprint_agent: "../agents/BlueprintAgent.yaml"
   dev_agent: "../agents/DevAgent.yaml"
   prompt_agent: "../agents/PromptAgent.yaml"
 
-# Templates
 templates:
   memory_templates: "../pms/memory_templates/"
   agent_templates: "../das/agent_templates/"
   doc_templates: "../docs/doc_templates/"  
 
-# Overviews  
-overviews:
-  readme: "../README.md"
-  pms_overview: "../pms/overview.md"
-  das_overview: "../das/overview.md"
-
-# Scripts
-scripts:
-  pms_core: "../pms/pms_core.py"
-  enforcer: "../das/enforcer.py"
-  devhub_cli: "../devhub_cli.py"
-
-# Rutas actualizadas estructura actual
 paths:
   status: "./project_status.md"
-  charter_modular: "../docs/01_ProjectCharter/"
-  charter_yaml: "../docs/01_ProjectCharter.yaml"
-  blueprint_modular: "../docs/02_blueprint/"
-  blueprint_yaml: "../docs/02_blueprint.yaml"
+  blueprint_yaml: "../docs/blueprint.yaml"
   blueprint_changes: "../docs/blueprint_changes.csv"
-  techspecs_modular: "../docs/03_TechSpecs/"
-  techspecs_yaml: "../docs/03_TechSpecs.yaml"
-  roadmap_modular: "../docs/04_roadmap/"
-  roadmap_yaml: "../docs/04_roadmap.yaml"
   backlog_modular: "../docs/05_backlog/"
-  backlog_yaml: "../docs/05_backlog.yaml"
-
+  
 config:
-  rollback_dual: true        # transacciones atómicas
-  sha_validation: true       # verificación de integridad
-  metrics_tracking: true     # seguimiento automático
-  expected_hash: ""          # hash SHA-1 esperado del blueprint
+  rollback_dual: true
+  sha_validation: true
+  metrics_tracking: true
